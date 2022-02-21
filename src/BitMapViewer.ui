@@ -315,7 +315,7 @@
        <item>
         <widget class="QCheckBox" name="useVDPPalette" >
          <property name="text" >
-          <string>Use VDP  palette registers</string>
+          <string>Use VDP palette registers</string>
          </property>
          <property name="checked" >
           <bool>true</bool>

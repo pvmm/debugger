@@ -22,6 +22,8 @@ public:
 public slots:
 	void setLocation(int addr);
 	void settingsChanged();
+	void enable();
+	void disable();
 	void refresh();
 	void registerChanged(int id, int value);
 

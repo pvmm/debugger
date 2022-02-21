@@ -88,3 +88,13 @@ void FlagsViewer::setFlags(quint8 newFlags)
 	flags = newFlags;
 	update();
 }
+
+void FlagsViewer::enable()
+{
+	setEnabled(true);
+}
+
+void FlagsViewer::disable()
+{
+	setEnabled(false);
+}

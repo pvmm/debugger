@@ -45,8 +45,7 @@ BitMapViewer::BitMapViewer(QWidget* parent)
 
 	scrollArea->setWidget(imageWidget);
 
-	useVDP = true;
-
+	usePalRegs = useVDPPalette->isChecked();
 	const unsigned char* vram    = VDPDataStore::instance().getVramPointer();
 	const unsigned char* palette = VDPDataStore::instance().getPalettePointer();
 	imageWidget->setVramSource(vram);
@@ -78,7 +77,7 @@ void BitMapViewer::decodeVDPregs()
 	int v1 = (regs[9] & 128) ? 212 : 192;
 	printf("\nlines acording to the bits %i,: %i\n", (regs[9] & 128), v1);
 	linesLabel->setText(QString("%1").arg(v1, 0, 10));
-	if (useVDP) linesVisible->setCurrentIndex((regs[9] & 128) ? 1 : 0);
+	if (usePalRegs) linesVisible->setCurrentIndex((regs[9] & 128) ? 1 : 0);
 
 	// Get the border color
 	int v2 = regs[7] & 15;
@@ -86,7 +85,7 @@ void BitMapViewer::decodeVDPregs()
 	if (regs[8] & 32) v2 = 0;
 	printf("\ncolor 0 is pallet regs %i,: %i\n", (regs[8] & 32), v2);
 	borderLabel->setText(QString("%1").arg(v2, 0, 10));
-	if (useVDP) bgColor->setValue(v2);
+	if (usePalRegs) bgColor->setValue(v2);
 
 	// Get current screenmode
 	static const int bits_modetxt[128] = {
@@ -134,7 +133,7 @@ void BitMapViewer::decodeVDPregs()
 	int v3 = ((regs[0] & 0x0E) << 1) | ((regs[1] & 0x18) >> 3) | ((regs[25] & 0x18) << 2);
 	printf("screenMod according to the bits: %i\n", v3);
 	modeLabel->setText(QString("%1").arg(bits_modetxt[v3], 0, 10));
-	if (useVDP) screenMode->setCurrentIndex(bits_mode[v3]);
+	if (usePalRegs) screenMode->setCurrentIndex(bits_mode[v3]);
 
 	// Get the current visible page
 	unsigned p = (regs[2] >> 5) & 3;
@@ -148,7 +147,7 @@ void BitMapViewer::decodeVDPregs()
 	setPages();
 
 	addressLabel->setText(hexValue(p * q, 5));
-	if (useVDP) showPage->setCurrentIndex(p);
+	if (usePalRegs) showPage->setCurrentIndex(p);
 }
 
 
@@ -210,7 +209,7 @@ void BitMapViewer::on_bgColor_valueChanged(int value)
 
 void BitMapViewer::on_useVDPRegisters_stateChanged(int state)
 {
-	useVDP = state;
+	usePalRegs = state;
 
 	screenMode->setEnabled(!state);
 	linesVisible->setEnabled(!state);
@@ -218,6 +217,16 @@ void BitMapViewer::on_useVDPRegisters_stateChanged(int state)
 	bgColor->setEnabled(!state);
 	decodeVDPregs();
 	imageWidget->refresh();
+}
+
+void BitMapViewer::enable()
+{
+	this->setEnabled(true);
+}
+
+void BitMapViewer::disable()
+{
+	this->setEnabled(false);
 }
 
 void BitMapViewer::on_zoomLevel_valueChanged(double d)
@@ -245,6 +254,7 @@ void BitMapViewer::on_editPaletteButton_clicked(bool /*checked*/)
 
 void BitMapViewer::on_useVDPPalette_stateChanged(int state)
 {
+	// FIXME!
 	if (state) {
 		const unsigned char* palette = VDPDataStore::instance().getPalettePointer();
 		imageWidget->setPaletteSource(palette);

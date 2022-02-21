@@ -12,13 +12,17 @@ class BitMapViewer : public QDialog, private Ui::BitMapViewer
 public:
 	BitMapViewer(QWidget* parent = nullptr);
 
+public slots:
+	void enable();
+	void disable();
+
 private:
 	void decodeVDPregs();
 	void setPages();
 
 	VramBitMappedView* imageWidget;
 	int screenMod;
-	bool useVDP;
+	bool usePalRegs;
 
 private slots:
 	void refresh();

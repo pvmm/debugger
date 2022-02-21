@@ -19,6 +19,8 @@ public:
 public slots:
 	void setLocation(int addr);
 	void setStackPointer(quint16 addr);
+	void enable();
+	void disable();
 
 private:
 	void wheelEvent(QWheelEvent* e) override;

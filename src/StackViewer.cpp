@@ -180,6 +180,16 @@ void StackViewer::setStackPointer(quint16 addr)
 	setLocation(addr);
 }
 
+void StackViewer::enable()
+{
+	setEnabled(true);
+}
+
+void StackViewer::disable()
+{
+	setEnabled(false);
+}
+
 void StackViewer::memdataTransfered(StackRequest* r)
 {
 	topAddress = r->offset;

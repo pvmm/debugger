@@ -19,6 +19,8 @@ public:
 
 public slots:
 	void refresh();
+	void enable();
+	void disable();
 
 private:
 	void resizeEvent(QResizeEvent* e) override;

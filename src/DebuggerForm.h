@@ -130,6 +130,7 @@ private:
 	VDPCommandRegViewer* VDPCommandRegView;
 
 	CommClient& comm;
+	CommClient::ConnStatus& connStatus;
 	DebugSession session;
 	MemoryLayout memLayout;
 	unsigned char* mainMemory;
@@ -199,6 +200,8 @@ private slots:
 	friend class DebuggableSizeHandler;
 
 signals:
+	void systemConnected();
+	void systemDisconnected();
 	void settingsChanged();
 	void symbolsChanged();
 	void debuggablesChanged(const QMap<QString, int>& list);

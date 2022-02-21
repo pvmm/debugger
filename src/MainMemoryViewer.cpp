@@ -89,6 +89,16 @@ void MainMemoryViewer::setSymbolTable(SymbolTable* symtable)
 	symTable = symtable;
 }
 
+void MainMemoryViewer::enable()
+{
+	setEnabled(true);
+}
+
+void MainMemoryViewer::disable()
+{
+	setEnabled(false);
+}
+
 void MainMemoryViewer::refresh()
 {
 	hexView->refresh();

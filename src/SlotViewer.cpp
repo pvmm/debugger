@@ -188,6 +188,16 @@ void SlotViewer::refresh()
 	CommClient::instance().sendCommand(new DebugMemMapperHandler(*this));
 }
 
+void SlotViewer::enable()
+{
+	setEnabled(true);
+}
+
+void SlotViewer::disable()
+{
+	setEnabled(false);
+}
+
 void SlotViewer::setMemoryLayout(MemoryLayout* ml)
 {
 	memLayout = ml;

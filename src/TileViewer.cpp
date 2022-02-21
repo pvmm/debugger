@@ -50,7 +50,6 @@ TileViewer::TileViewer(QWidget *parent) : QDialog(parent), image4label(32, 32, Q
     connect(&VDPDataStore::instance(), SIGNAL(dataRefreshed()),
             this, SLOT(VDPDataStoreDataRefreshed()));
 
-
     imageWidget = new VramTiledView();
     QSizePolicy sizePolicy1(QSizePolicy::Fixed, QSizePolicy::Fixed);
     sizePolicy1.setHorizontalStretch(0);
@@ -68,8 +67,8 @@ TileViewer::TileViewer(QWidget *parent) : QDialog(parent), image4label(32, 32, Q
 //    imageWidget->setNameTableAddress(0);
 //    imageWidget->setPatternTableAddress(0);
 //    imageWidget->setColorTableAddress(0);
-	imageWidget->setPaletteSource(palette);
     imageWidget->setVramSource(vram);
+    imageWidget->setPaletteSource(palette);
     imageWidget->setUseBlink(cb_blinkcolors->isChecked());
     imageWidget->setDrawgrid(cb_drawgrid->isChecked());
 
@@ -92,6 +91,16 @@ TileViewer::TileViewer(QWidget *parent) : QDialog(parent), image4label(32, 32, Q
 TileViewer::~TileViewer()
 {
 
+}
+
+void TileViewer::enable()
+{
+	this->setEnabled(true);
+}
+
+void TileViewer::disable()
+{
+	this->setEnabled(false);
 }
 
 void TileViewer::VDPDataStoreDataRefreshed()
@@ -189,6 +198,7 @@ void TileViewer::decodeVDPregs()
     int reg3mask=255; // mask for colortable
     int reg4mask=255; // mask for patterntable
     bool usesblink=false;
+
     switch (v) {
         case 0: modetext = QString("Graphic1"); cbindex=2; break;
         case 1: modetext = QString("MultiColor"); cbindex=4; break;
@@ -202,10 +212,10 @@ void TileViewer::decodeVDPregs()
         case 16: modetext = QString("Graphic5"); break;
         case 20: modetext = QString("Graphic6"); break;
         case 28: modetext = QString("Graphic7"); break;
-    default: modetext = QString("unknown"); break;
+        default: modetext = QString("unknown"); break;
     }
-    label_screenmode->setText(modetext);
 
+    label_screenmode->setText(modetext);
 
     if (useVDPRegisters->isChecked()){
         cb_screen->setCurrentIndex(cbindex);
@@ -356,12 +366,14 @@ void TileViewer::on_editPaletteButton_clicked(bool /*checked*/)
 void TileViewer::on_useVDPPalette_stateChanged(int state)
 {
     const unsigned char* palette = VDPDataStore::instance().getPalettePointer();
+
     if (state) {
         imageWidget->setPaletteSource(palette);
     } else {
-        if (palette!=nullptr) memcpy(defaultPalette,palette,32);
+        if (palette != nullptr) memcpy(defaultPalette, palette, 32);
         imageWidget->setPaletteSource(defaultPalette);
     }
+
     imageWidget->refresh();
     editPaletteButton->setEnabled(!state);
 }
@@ -378,7 +390,7 @@ void TileViewer::on_cb_drawgrid_stateChanged(int state)
 
 void TileViewer::on_cb_highlight_stateChanged(int state)
 {
-    if (state == Qt::Unchecked){
+    if (state == Qt::Unchecked) {
         imageWidget->setHighlightchar(-1);
     } else {
         imageWidget->setHighlightchar(sp_highlight->value());
@@ -387,7 +399,7 @@ void TileViewer::on_cb_highlight_stateChanged(int state)
 
 void TileViewer::on_sp_highlight_valueChanged(int i)
 {
-    if ( cb_highlight->isChecked()){
+    if (cb_highlight->isChecked()) {
         imageWidget->setHighlightchar(i);
     }
 }

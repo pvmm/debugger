@@ -135,6 +135,16 @@ void DisasmViewer::updateLayout()
 	update();
 }
 
+void DisasmViewer::enable()
+{
+	setEnabled(true);
+}
+
+void DisasmViewer::disable()
+{
+	setEnabled(false);
+}
+
 void DisasmViewer::refresh()
 {
 	int disasmStart = disasmLines.front().addr;

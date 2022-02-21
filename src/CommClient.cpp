@@ -37,8 +37,13 @@ void CommClient::closeConnection()
 		connection->disconnect(this, SLOT(closeConnection()));
 		delete connection;
 		connection = nullptr;
-		emit connectionTerminated();
+		emit connectionTerminated(); // HERE!
 	}
+}
+
+CommClient::ConnStatus CommClient::connectionStatus()
+{
+	return connection ? CONNECTED : DISCONNECTED;
 }
 
 void CommClient::sendCommand(Command* command)

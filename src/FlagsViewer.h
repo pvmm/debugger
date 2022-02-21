@@ -18,6 +18,8 @@ public:
 
 public slots:
 	void setFlags(quint8 newFlags);
+	void enable();
+	void disable();
 
 private:
 	void resizeEvent(QResizeEvent* e) override;

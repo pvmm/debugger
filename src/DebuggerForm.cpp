@@ -517,6 +517,10 @@ void DebuggerForm::createForm()
 	dw->setDestroyable(false);
 	dw->setMovable(false);
 	dw->setClosable(false);
+	connect(this, SIGNAL(systemConnected()), disasmView,
+			SLOT(enable()));
+	connect(this, SIGNAL(systemDisconnected()), disasmView,
+			SLOT(disable()));
 	connect(this, SIGNAL(settingsChanged()),
 	        disasmView, SLOT(updateLayout()));
 	connect(this, SIGNAL(symbolsChanged()),
@@ -536,6 +540,10 @@ void DebuggerForm::createForm()
 	dw->setDestroyable(false);
 	dw->setMovable(true);
 	dw->setClosable(true);
+	connect(this, SIGNAL(systemConnected()), mainMemoryView,
+			SLOT(enable()));
+	connect(this, SIGNAL(systemDisconnected()), mainMemoryView,
+			SLOT(disable()));
 	connect(dw, SIGNAL(visibilityChanged(DockableWidget*)),
 	        this, SLOT(dockWidgetVisibilityChanged(DockableWidget*)));
 	connect(this, SIGNAL(breakStateEntered()),
@@ -552,6 +560,10 @@ void DebuggerForm::createForm()
 	dw->setDestroyable(false);
 	dw->setMovable(true);
 	dw->setClosable(true);
+	connect(this, SIGNAL(systemConnected()), regsView,
+			SLOT(enable()));
+	connect(this, SIGNAL(systemDisconnected()), regsView,
+			SLOT(disable()));
 	connect(dw, SIGNAL(visibilityChanged(DockableWidget*)),
 	        this, SLOT(dockWidgetVisibilityChanged(DockableWidget*)));
 
@@ -571,6 +583,10 @@ void DebuggerForm::createForm()
 	dw->setDestroyable(false);
 	dw->setMovable(true);
 	dw->setClosable(true);
+	connect(this, SIGNAL(systemConnected()), flagsView,
+			SLOT(enable()));
+	connect(this, SIGNAL(systemDisconnected()), flagsView,
+			SLOT(disable()));
 	connect(dw, SIGNAL(visibilityChanged(DockableWidget*)),
 	        this, SLOT(dockWidgetVisibilityChanged(DockableWidget*)));
 
@@ -584,6 +600,10 @@ void DebuggerForm::createForm()
 	dw->setDestroyable(false);
 	dw->setMovable(true);
 	dw->setClosable(true);
+	connect(this, SIGNAL(systemConnected()), stackView,
+			SLOT(enable()));
+	connect(this, SIGNAL(systemDisconnected()), stackView,
+			SLOT(disable()));
 	connect(dw, SIGNAL(visibilityChanged(DockableWidget*)),
 	        this, SLOT(dockWidgetVisibilityChanged(DockableWidget*)));
 
@@ -597,6 +617,10 @@ void DebuggerForm::createForm()
 	dw->setDestroyable(false);
 	dw->setMovable(true);
 	dw->setClosable(true);
+	connect(this, SIGNAL(systemConnected()), slotView,
+			SLOT(enable()));
+	connect(this, SIGNAL(systemDisconnected()), slotView,
+			SLOT(disable()));
 	connect(dw, SIGNAL(visibilityChanged(DockableWidget*)),
 	        this, SLOT(dockWidgetVisibilityChanged(DockableWidget*)));
 	connect(this, SIGNAL(breakStateEntered()),
@@ -864,6 +888,7 @@ void DebuggerForm::initConnection()
 
 void DebuggerForm::connectionClosed()
 {
+	connStatus = DISCONNECTED;
 	systemPauseAction->setEnabled(false);
 	systemRebootAction->setEnabled(false);
 	executeBreakAction->setEnabled(false);
@@ -878,9 +903,7 @@ void DebuggerForm::connectionClosed()
 	breakpointToggleAction->setEnabled(false);
 	breakpointAddAction->setEnabled(false);
 
-	for (auto* w : dockMan.managedWidgets()) {
-		w->widget()->setEnabled(false);
-	}
+	emit systemDisconnected();
 }
 
 void DebuggerForm::finalizeConnection(bool halted)
@@ -897,9 +920,7 @@ void DebuggerForm::finalizeConnection(bool halted)
 		setRunMode();
 	}
 
-	for (auto* w : dockMan.managedWidgets()) {
-		w->widget()->setEnabled(true);
-	}
+	emit systemConnected();
 }
 
 void DebuggerForm::handleUpdate(const QString& type, const QString& name,
@@ -1059,6 +1080,7 @@ void DebuggerForm::systemConnect()
 void DebuggerForm::systemDisconnect()
 {
 	comm.closeConnection();
+	emit systemDisconnected();
 }
 
 void DebuggerForm::systemPause()
@@ -1227,6 +1249,7 @@ void DebuggerForm::toggleBitMappedDisplay()
 {
 	// create new debuggable viewer window
 	auto* viewer = new BitMapViewer();
+	viewer->setEnabled(conn.connectionStatus() == CONNECTED);
 	auto* dw = new DockableWidget(dockMan);
 	dw->setWidget(viewer);
 	dw->setTitle(tr("Bitmapped VRAM View"));
@@ -1235,6 +1258,10 @@ void DebuggerForm::toggleBitMappedDisplay()
 	dw->setDestroyable(true);
 	dw->setMovable(true);
 	dw->setClosable(true);
+	connect(this, SIGNAL(systemConnected()), viewer,
+			SLOT(enable()));
+	connect(this, SIGNAL(systemDisconnected()), viewer,
+			SLOT(disable()));
 	// TODO: refresh should be hanled by VDPDataStore...
 	connect(this, SIGNAL(breakStateEntered()), viewer,
 			SLOT(refresh()));
@@ -1254,6 +1281,10 @@ void DebuggerForm::toggleCharMappedDisplay()
 	dw->setMovable(true);
 	dw->setClosable(true);
 	// dw->adjustSize();
+	connect(this, SIGNAL(systemConnected()), viewer,
+			SLOT(enable()));
+	connect(this, SIGNAL(systemDisconnected()), viewer,
+			SLOT(disable()));
 	// TODO: refresh should be being hanled by VDPDataStore...
 	connect(this, SIGNAL(breakStateEntered()), viewer,
 			SLOT(refresh()));
@@ -1274,7 +1305,10 @@ void DebuggerForm::toggleSpritesDisplay()
 	dw->setDestroyable(true);
 	dw->setMovable(true);
 	dw->setClosable(true);
-
+	connect(this, SIGNAL(systemConnected()), viewer,
+			SLOT(enable()));
+	connect(this, SIGNAL(systemDisconnected()), viewer,
+			SLOT(disable()));
 	// TODO: refresh should be being hanled by VDPDataStore...
 	connect(this, SIGNAL(breakStateEntered()), viewer, SLOT(refresh()));
 }
@@ -1291,6 +1325,10 @@ void DebuggerForm::toggleVDPCommandRegsDisplay()
 		dw->setDestroyable(false);
 		dw->setMovable(true);
 		dw->setClosable(true);
+		connect(this, SIGNAL(systemConnected()), VDPCommandRegView,
+				SLOT(enable()));
+		connect(this, SIGNAL(systemDisconnected()), VDPCommandRegView,
+				SLOT(disable()));
 		connect(this, SIGNAL(breakStateEntered()),
 		        VDPCommandRegView, SLOT(refresh()));
 	} else {
@@ -1310,6 +1348,10 @@ void DebuggerForm::toggleVDPRegsDisplay()
 		dw->setDestroyable(false);
 		dw->setMovable(true);
 		dw->setClosable(true);
+		connect(this, SIGNAL(systemConnected()), VDPRegView,
+				SLOT(enable()));
+		connect(this, SIGNAL(systemDisconnected()), VDPRegView,
+				SLOT(disable()));
 		connect(this, SIGNAL(breakStateEntered()),
 		        VDPRegView, SLOT(refresh()));
 	} else {
@@ -1329,6 +1371,10 @@ void DebuggerForm::toggleVDPStatusRegsDisplay()
 		dw->setDestroyable(false);
 		dw->setMovable(true);
 		dw->setClosable(true);
+		connect(this, SIGNAL(systemConnected()), VDPStatusRegView,
+				SLOT(enable()));
+		connect(this, SIGNAL(systemDisconnected()), VDPStatusRegView,
+				SLOT(disable()));
 		connect(this, SIGNAL(breakStateEntered()),
 		        VDPStatusRegView, SLOT(refresh()));
 	} else {
@@ -1363,6 +1409,10 @@ void DebuggerForm::addDebuggableViewer()
 	dw->setDestroyable(true);
 	dw->setMovable(true);
 	dw->setClosable(true);
+	connect(this, SIGNAL(systemConnected()), viewer,
+			SLOT(enable()));
+	connect(this, SIGNAL(systemDisconnected()), viewer,
+			SLOT(disable()));
 	connect(dw, SIGNAL(visibilityChanged(DockableWidget*)),
 	        this, SLOT(dockWidgetVisibilityChanged(DockableWidget*)));
 	connect(this, SIGNAL(debuggablesChanged(const QMap<QString,int>&)),

@@ -37,6 +37,8 @@ public slots:
 	void scrollBarAction(int action);
 	void scrollBarChanged(int value);
 	void updateLayout();
+	void enable();
+	void disable();
 	void refresh();
 
 private:

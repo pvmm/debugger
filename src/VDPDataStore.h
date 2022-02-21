@@ -40,7 +40,7 @@ public slots:
 	void refresh();
 
 signals:
-        void dataRefreshed(); // The refresh got the new data
+	void dataRefreshed(); // The refresh got the new data
 
 	/** This might become handy later on, for now we only need the dataRefreshed
 	 *

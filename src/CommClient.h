@@ -18,6 +18,8 @@ public:
 public slots:
 	void connectToOpenMSX(OpenMSXConnection* conn);
 	void closeConnection();
+	enum ConnStatus { DISCONNECTED = 0, CONNECTED };
+	ConnStatus connectionStatus();
 
 signals:
 	void connectionReady();

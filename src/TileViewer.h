@@ -4,7 +4,7 @@
 #include "ui_TileViewer.h"
 #include <QDialog>
 
-class VramTiledView; 
+class VramTiledView;
 
 class TileViewer : public QDialog,private Ui::TileViewer
 {
@@ -13,6 +13,10 @@ class TileViewer : public QDialog,private Ui::TileViewer
 public:
     explicit TileViewer(QWidget *parent = nullptr);
     ~TileViewer();
+
+public slots:
+	void enable();
+	void disable();
 
 private:
     void decodeVDPregs();

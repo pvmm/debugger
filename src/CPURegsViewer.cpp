@@ -84,6 +84,16 @@ QSize CPURegsViewer::sizeHint() const
 	        frameT + 8 * fontMetrics().height() + frameB};
 }
 
+void CPURegsViewer::enable()
+{
+	setEnabled(true);
+}
+
+void CPURegsViewer::disable()
+{
+	setEnabled(false);
+}
+
 void CPURegsViewer::drawValue(QPainter& p, int id, int x, int y)
 {
 	// determine value colour

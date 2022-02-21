@@ -16,6 +16,10 @@ public:
 
 	QSize sizeHint() const override;
 
+public slots:
+	void enable();
+	void disable();
+
 private:
 	void resizeEvent(QResizeEvent* e) override;
 	void paintEvent(QPaintEvent* e) override;
