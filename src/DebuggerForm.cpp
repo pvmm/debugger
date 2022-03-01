@@ -79,42 +79,6 @@ private:
 	DebuggerForm& form;
 };
 
-
-class ListBreakPointsHandler : public SimpleCommand
-{
-public:
-	ListBreakPointsHandler(DebuggerForm& form_, bool merge_ = false)
-		: SimpleCommand("debug_list_all_breaks")
-		, form(form_), merge(merge_)
-	{
-	}
-
-	void replyOk(const QString& message) override
-	{
-		if (merge) {
-			QString bps = form.session.breakpoints().mergeBreakpoints(message);
-			if (!bps.isEmpty()) {
-				form.comm.sendCommand(new SimpleCommand(bps));
-				form.comm.sendCommand(new ListBreakPointsHandler(form, false));
-			} else {
-				form.disasmView->update();
-				form.session.sessionModified();
-				form.updateWindowTitle();
-			}
-		} else {
-			form.session.breakpoints().setBreakpoints(message);
-			form.disasmView->update();
-			form.session.sessionModified();
-			form.updateWindowTitle();
-		}
-		delete this;
-	}
-private:
-	DebuggerForm& form;
-	bool merge;
-};
-
-
 class CPURegRequest : public ReadDebugBlockCommand
 {
 public:
@@ -939,7 +903,7 @@ void DebuggerForm::breakOccured()
 
 void DebuggerForm::updateData()
 {
-	comm.sendCommand(new ListBreakPointsHandler(*this, mergeBreakpoints));
+	reloadBreakpoints(mergeBreakpoints);
 	// only merge the first time after connect
 	mergeBreakpoints = false;
 
@@ -1009,7 +973,7 @@ void DebuggerForm::openSession(const QString& file)
 	session.open(file);
 	if (systemDisconnectAction->isEnabled()) {
 		// active connection, merge loaded breakpoints
-		comm.sendCommand(new ListBreakPointsHandler(*this, true));
+		reloadBreakpoints(true);
 	}
 	// update recent
 	if (session.existsAsFile()) {
@@ -1175,8 +1139,7 @@ void DebuggerForm::toggleBreakpoint(int addr)
 		// create command
 		cmd = Breakpoints::createSetCommand(Breakpoints::BREAKPOINT, addr, ps, ss, seg);
 	}
-	comm.sendCommand(new SimpleCommand(cmd));
-	comm.sendCommand(new ListBreakPointsHandler(*this));
+	comm.sendCommand(new Command(cmd, [this](const QString&){ reloadBreakpoints(); }));
 }
 
 void DebuggerForm::addBreakpoint()
@@ -1191,8 +1154,8 @@ void DebuggerForm::addBreakpoint()
 			QString cmd = Breakpoints::createSetCommand(
 				bpd.type(), bpd.address(), bpd.slot(), bpd.subslot(), bpd.segment(),
 				bpd.addressEndRange(), bpd.condition());
-			comm.sendCommand(new SimpleCommand(cmd));
-			comm.sendCommand(new ListBreakPointsHandler(*this));
+			comm.sendCommand(new Command(cmd,
+				[this](const QString&){ reloadBreakpoints(); }));
 		}
 	}
 }
@@ -1505,4 +1468,34 @@ void DebuggerForm::addressSlot(int addr, int& ps, int& ss, int& segment)
 		if (memLayout.romBlock[q] >= 0)
 			segment = memLayout.romBlock[q];
 	}
+}
+
+void DebuggerForm::reloadBreakpoints(bool merge)
+{
+	qDebug() << "reloadBreakpoints(bool merge) called";
+	auto command = new Command("debug_list_all_breaks",
+		[this, merge](const QString& message){
+			qDebug() << "merge" << merge << "message:" << message;
+			if (merge) {
+				qDebug() << "merge is true";
+				QString bps = session.breakpoints().mergeBreakpoints(message);
+				qDebug() << "bps:" << bps;
+				if (!bps.isEmpty()) {
+					comm.sendCommand(new SimpleCommand(bps));
+					reloadBreakpoints(false);
+				} else {
+					disasmView->update();
+					session.sessionModified();
+					updateWindowTitle();
+				}
+			} else {
+				qDebug() << "merge is false";
+				session.breakpoints().setBreakpoints(message); /* here */
+				disasmView->update();
+				session.sessionModified();
+				updateWindowTitle();
+			}
+		}
+	);
+	comm.sendCommand(command);
 }

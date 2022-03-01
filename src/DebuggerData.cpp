@@ -183,6 +183,7 @@ void Breakpoints::setBreakpoints(const QString& str)
 		newBp.condition = bp.mid(p, q - p).simplified();
 		unescapeXML(newBp.condition);
 		parseCondition(newBp);
+		qDebug() << newBp.id << newBp.address;
 		insertBreakpoint(newBp);
 	}
 }
@@ -205,6 +206,7 @@ QString Breakpoints::mergeBreakpoints(const QString& str)
 			// create command to set this breakpoint again
 			QString cmd = createSetCommand(old.type, old.address, old.ps, old.ss, old.segment,
 			                               old.regionEnd, old.condition);
+		    qDebug() << "cmd:" << cmd;
 			mergeSet << cmd;
 		}
 	}
