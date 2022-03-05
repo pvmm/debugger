@@ -614,7 +614,9 @@ void DebuggerForm::createForm()
 		list.append(QString("MEMORY D V B %1 %2 %3").arg(codeW)
 		                                             .arg(regW + flagW + slotW)
 		                                             .arg(codeH - regH));
-		list.append(QString("DEBUG D V B %1 -1 -1").arg(codeW));
+		int stackW = dockMan.findDockableWidget("STACK")->sizeHint().width();
+		list.append(QString("DEBUG D V B %1 %2 -1").arg(codeW)
+		                                             .arg(regW + flagW + slotW + stackW));
 	}
 
 	// add widgets

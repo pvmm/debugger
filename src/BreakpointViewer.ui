@@ -25,13 +25,106 @@
   <property name="currentIndex">
    <number>0</number>
   </property>
+  <property name="elideMode">
+   <enum>Qt::ElideRight</enum>
+  </property>
+  <property name="documentMode">
+   <bool>true</bool>
+  </property>
+  <property name="movable">
+   <bool>true</bool>
+  </property>
   <widget class="QWidget" name="tabBpLabel">
    <attribute name="title">
     <string>Breakpoints</string>
    </attribute>
-   <layout class="QGridLayout" name="_19">
-    <item row="0" column="1">
-     <layout class="QVBoxLayout" name="_20">
+   <layout class="QHBoxLayout">
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QTableWidget" name="bpTableWidget">
+      <property name="frameShape">
+       <enum>QFrame::WinPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Sunken</enum>
+      </property>
+      <property name="lineWidth">
+       <number>0</number>
+      </property>
+      <property name="alternatingRowColors">
+       <bool>true</bool>
+      </property>
+      <property name="selectionMode">
+       <enum>QAbstractItemView::SingleSelection</enum>
+      </property>
+      <property name="selectionBehavior">
+       <enum>QAbstractItemView::SelectRows</enum>
+      </property>
+      <attribute name="horizontalHeaderVisible">
+       <bool>true</bool>
+      </attribute>
+      <attribute name="horizontalHeaderMinimumSectionSize">
+       <number>10</number>
+      </attribute>
+      <attribute name="horizontalHeaderDefaultSectionSize">
+       <number>120</number>
+      </attribute>
+      <attribute name="horizontalHeaderStretchLastSection">
+       <bool>false</bool>
+      </attribute>
+      <attribute name="verticalHeaderVisible">
+       <bool>false</bool>
+      </attribute>
+      <column>
+       <property name="text">
+        <string>X</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Address</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Condition</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Primary slot</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Secondary slot</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Segment</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Once</string>
+       </property>
+      </column>
+     </widget>
+    </item>
+    <item>
+     <layout class="QVBoxLayout">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
       <item>
        <widget class="QPushButton" name="btnAddBp">
         <property name="text">
@@ -61,106 +154,57 @@
       </item>
      </layout>
     </item>
-    <item row="0" column="0">
-     <widget class="QTableWidget" name="bpTableWidget">
-      <property name="selectionMode">
-       <enum>QAbstractItemView::ExtendedSelection</enum>
-      </property>
-      <column>
-       <property name="text">
-        <string>Enabled</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Address</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Condition</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Command</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Once</string>
-       </property>
-      </column>
-     </widget>
-    </item>
    </layout>
   </widget>
   <widget class="QWidget" name="tabWpLabel">
    <attribute name="title">
     <string>Watchpoints</string>
    </attribute>
-   <layout class="QGridLayout" name="_21">
-    <item row="0" column="1">
-     <layout class="QVBoxLayout" name="_22">
-      <item>
-       <widget class="QPushButton" name="btnAddWp">
-        <property name="text">
-         <string>Add</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="btnRemoveWp">
-        <property name="text">
-         <string>Remove</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="btnDisableWp">
-        <property name="text">
-         <string>Disable</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer>
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </item>
-    <item row="0" column="0">
+   <layout class="QHBoxLayout">
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <item>
      <widget class="QTableWidget" name="wpTableWidget">
+      <property name="frameShape">
+       <enum>QFrame::WinPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Sunken</enum>
+      </property>
+      <property name="lineWidth">
+       <number>0</number>
+      </property>
+      <property name="alternatingRowColors">
+       <bool>true</bool>
+      </property>
       <property name="selectionMode">
-       <enum>QAbstractItemView::ExtendedSelection</enum>
+       <enum>QAbstractItemView::SingleSelection</enum>
       </property>
-      <property name="sortingEnabled">
-       <bool>false</bool>
+      <property name="selectionBehavior">
+       <enum>QAbstractItemView::SelectRows</enum>
       </property>
-      <property name="rootIsDecorated" stdset="0">
-       <bool>false</bool>
-      </property>
-      <property name="uniformRowHeights" stdset="0">
+      <attribute name="horizontalHeaderVisible">
        <bool>true</bool>
-      </property>
-      <property name="itemsExpandable" stdset="0">
+      </attribute>
+      <attribute name="horizontalHeaderMinimumSectionSize">
+       <number>10</number>
+      </attribute>
+      <attribute name="horizontalHeaderDefaultSectionSize">
+       <number>120</number>
+      </attribute>
+      <attribute name="horizontalHeaderStretchLastSection">
        <bool>false</bool>
-      </property>
-      <property name="allColumnsShowFocus" stdset="0">
-       <bool>true</bool>
-      </property>
+      </attribute>
+      <attribute name="verticalHeaderVisible">
+       <bool>false</bool>
+      </attribute>
       <column>
        <property name="text">
-        <string>Enabled</string>
+        <string>X</string>
        </property>
       </column>
       <column>
@@ -180,10 +224,57 @@
       </column>
       <column>
        <property name="text">
-        <string>Command</string>
+        <string>Primary slot</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Secondary slot</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Segment</string>
        </property>
       </column>
      </widget>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="wpLayout">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QPushButton" name="btnAddWp">
+        <property name="text">
+         <string>Add</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnRemoveWp">
+        <property name="text">
+         <string>Remove</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer>
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>

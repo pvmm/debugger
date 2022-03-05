@@ -37,7 +37,9 @@ BreakpointViewer::BreakpointViewer(QWidget* parent)
 {
 	setupUi(this);
 	bpTableWidget->sortByColumn(BP_ADDRESS, Qt::AscendingOrder);
-	bpTableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
+	wpTableWidget->sortByColumn(WP_ADDRESS, Qt::AscendingOrder);
+	bpTableWidget->resizeColumnsToContents();
+	wpTableWidget->resizeColumnsToContents();
 
 	userMode = true;
 
