@@ -37,7 +37,7 @@ BreakpointViewer::BreakpointViewer(QWidget* parent)
 {
 	setupUi(this);
 	bpTableWidget->sortByColumn(BP_ADDRESS, Qt::AscendingOrder);
-	wpTableWidget->sortByColumn(WP_ADDRESS, Qt::AscendingOrder);
+	wpTableWidget->sortByColumn(WP_REGION, Qt::AscendingOrder);
 	bpTableWidget->resizeColumnsToContents();
 	wpTableWidget->resizeColumnsToContents();
 
@@ -176,7 +176,9 @@ void BreakpointViewer::onBpTableItemChanged(QTableWidgetItem* item)
 
 		if (createBp) {
 			if (!addressStr.length()) {
+				userMode = false;
 				enabledItem->setCheckState(Qt::Unchecked);
+				userMode = true;
 			} else {
 				createBreakpoint(addressStr, conditionStr);
 			}
@@ -324,9 +326,12 @@ void BreakpointViewer::on_btnAddBp_clicked()
 	item->setCheckState(Qt::Unchecked);
 	bpTableWidget->setItem(row, BP_ENABLED, item);
 	userMode = true;
+
+ 	bpTableWidget->resizeColumnsToContents();
 }
 
 void BreakpointViewer::on_btnRemoveBp_clicked()
 {
 	bpTableWidget->removeRow(bpTableWidget->currentRow());
+	bpTableWidget->resizeColumnsToContents();
 }
