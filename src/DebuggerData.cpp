@@ -352,6 +352,7 @@ QStringList AttributeNames = {
 	"ss",
 	"segment",
 	"condition",
+	"once",
 };
 
 QVariant Breakpoints::getAttribute(int index, QString attrName) const
@@ -374,6 +375,8 @@ QVariant Breakpoints::getAttribute(int index, QString attrName) const
 			return breakpoints[index].segment;
 		case 7:
 			return breakpoints[index].condition;
+		case 8:
+			return breakpoints[index].once;
 		default:
 			break;
 	}

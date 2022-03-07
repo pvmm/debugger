@@ -335,3 +335,9 @@ void BreakpointViewer::on_btnRemoveBp_clicked()
 	bpTableWidget->removeRow(bpTableWidget->currentRow());
 	bpTableWidget->resizeColumnsToContents();
 }
+
+void BreakpointViewer::updateOnce(quint16 addr)
+{
+	qDebug() << "BreakpointViewer::updateOnce() called" << addr;
+	// if ()
+}

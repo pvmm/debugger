@@ -157,6 +157,8 @@ void DisasmViewer::refresh()
 
 void DisasmViewer::paintEvent(QPaintEvent* e)
 {
+	bool maybe_once = false;
+	
 	// call parent for drawing the actual frame
 	QFrame::paintEvent(e);
 
@@ -237,6 +239,10 @@ void DisasmViewer::paintEvent(QPaintEvent* e)
 			// draw breakpoint marker
 			if (row->infoLine == 0) {
 				if (breakpoints->isBreakpoint(row->addr)) {
+					int index;
+					if ((index = breakpoints->findBreakpoint(row->addr)) == -1) {
+						maybe_once = true;
+					}
 					p.drawPixmap(frameL + 2, y + h / 2 -5, breakMarker);
 					if (!isCursorLine) {
 						p.fillRect(frameL + 32, y, width() - 32 - frameL - frameR, h,
@@ -249,6 +255,8 @@ void DisasmViewer::paintEvent(QPaintEvent* e)
 			}
 			// draw PC marker
 			if (row->addr == programAddr && row->infoLine == 0) {
+				qDebug() << "once triggered?";
+				if (maybe_once) emit onceTriggered(row->addr);
 				p.drawPixmap(frameL + 18, y + h / 2 - 5, pcMarker);
 			}
 

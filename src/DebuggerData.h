@@ -63,6 +63,8 @@ private:
 		qint16 segment;
 		// general condition
 		QString condition;
+		// repeat more than once?
+		bool once;
 		// compare content
 		bool operator==(const Breakpoint &bp) const;
 	};

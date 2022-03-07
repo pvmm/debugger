@@ -39,6 +39,7 @@ public slots:
 	void onBpTableItemChanged(QTableWidgetItem *item);
 	void on_btnAddBp_clicked();
 	void on_btnRemoveBp_clicked();
+	void updateOnce(quint16 addr); // only used for -once
 
 signals:
 	void breakpointsChanged(bool merge);

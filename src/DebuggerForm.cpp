@@ -521,6 +521,8 @@ void DebuggerForm::createForm()
 	bpView = new BreakpointViewer(this);
 	connect(bpView, &BreakpointViewer::breakpointsChanged, this,
 		&DebuggerForm::reloadBreakpoints);
+	connect(disasmView, &DisasmViewer::onceTriggered, bpView,
+			&BreakpointViewer::updateOnce);
 	dw = new DockableWidget(dockMan);
 	dw->setWidget(bpView);
 	dw->setTitle(tr("Debug list"));

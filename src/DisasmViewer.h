@@ -82,6 +82,7 @@ private:
 
 signals:
 	void breakpointToggled(int addr);
+	void onceTriggered(int addr);
 };
 
 #endif // DISASMVIEWER_H
