@@ -35,6 +35,7 @@ public:
 	int breakpointCount();
 	bool isBreakpoint(quint16 addr, QString *id = nullptr);
 	bool isWatchpoint(quint16 addr, QString *id = nullptr);
+	quint16 getAddress(int current_index);
 
 	/* xml session file functions */
 	void saveBreakpoints(QXmlStreamWriter& xml);
@@ -42,6 +43,7 @@ public:
 
 	int findBreakpoint(quint16 addr);
 	int findNextBreakpoint();
+	QVariant getAttribute(int bpIndex, QString attrName) const;
 
 	static QString createSetCommand(Type type, int address,
 	                                char ps = -1, char ss = -1, int segment = -1,
@@ -67,6 +69,7 @@ private:
 
 	std::vector<Breakpoint> breakpoints;
 	MemoryLayout* memLayout;
+	int currentIndex;
 
 	void parseCondition(Breakpoint& bp);
 	void insertBreakpoint(Breakpoint& bp);

@@ -64,9 +64,8 @@ bool Breakpoints::Breakpoint::operator==(const Breakpoint &bp) const
 	return bp.condition == condition;
 }
 
-
 Breakpoints::Breakpoints()
-	: memLayout(nullptr)
+	: memLayout(nullptr), currentIndex(-1)
 {
 }
 
@@ -284,7 +283,7 @@ int Breakpoints::breakpointCount()
 	return breakpoints.size();
 }
 
-bool Breakpoints::isBreakpoint(quint16 addr, QString *id)
+bool Breakpoints::isBreakpoint(quint16 addr, QString* id)
 {
 	for (const auto& bp : breakpoints) {
 		if (bp.type == BREAKPOINT && bp.address == addr) {
@@ -297,7 +296,7 @@ bool Breakpoints::isBreakpoint(quint16 addr, QString *id)
 	return false;
 }
 
-bool Breakpoints::isWatchpoint(quint16 addr, QString *id)
+bool Breakpoints::isWatchpoint(quint16 addr, QString* id)
 {
 	for (const auto& bp : breakpoints) {
 		if (bp.type == WATCHPOINT_MEMREAD || bp.type == WATCHPOINT_MEMWRITE) {
@@ -313,6 +312,13 @@ bool Breakpoints::isWatchpoint(quint16 addr, QString *id)
 	return false;
 }
 
+quint16 Breakpoints::getAddress(int current_index)
+{
+	if (currentIndex != -1)
+       return breakpoints[currentIndex].address;
+   return -1;
+}
+
 int Breakpoints::findBreakpoint(quint16 addr)
 {
     auto i = std::lower_bound(breakpoints.begin(), breakpoints.end(), addr,
@@ -321,18 +327,58 @@ int Breakpoints::findBreakpoint(quint16 addr)
 			   }
    			);
 	if (i != breakpoints.end() && i->address == addr) {
-		return i - breakpoints.begin();
+		currentIndex = i - breakpoints.begin();
+	} else {
+		currentIndex = -1;
 	}
-	return -1;
+	return currentIndex;
 }
 
 int Breakpoints::findNextBreakpoint()
 {
-	// stub
-	// will implement findfirst/findnext scheme for speed
+	qDebug() << "breakpointCount = " << breakpointCount();
+	if (currentIndex < breakpointCount() - 1) {
+		return ++currentIndex;
+	}
 	return -1;
 }
 
+QStringList AttributeNames = {
+	"type",
+	"id",
+	"address",
+	"regionEnd",
+	"ps",
+	"ss",
+	"segment",
+	"condition",
+};
+
+QVariant Breakpoints::getAttribute(int index, QString attrName) const
+{
+	switch (AttributeNames.indexOf(attrName))
+	{
+		case 0:
+			return breakpoints[index].type;
+		case 1:
+			return breakpoints[index].id;
+		case 2:
+			return breakpoints[index].address;
+		case 3:
+			return breakpoints[index].regionEnd;
+		case 4:
+			return breakpoints[index].ps;
+		case 5:
+			return breakpoints[index].ss;
+		case 6:
+			return breakpoints[index].segment;
+		case 7:
+			return breakpoints[index].condition;
+		default:
+			break;
+	}
+	return QVariant();
+}
 
 void Breakpoints::saveBreakpoints(QXmlStreamWriter& xml)
 {

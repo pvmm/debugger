@@ -9,6 +9,7 @@
 #include "FlagsViewer.h"
 #include "StackViewer.h"
 #include "SlotViewer.h"
+#include "BreakpointViewer.h"
 #include "CommClient.h"
 #include "ConnectDialog.h"
 #include "SymbolManager.h"
@@ -261,6 +262,10 @@ void DebuggerForm::createActions()
 	viewRegistersAction->setStatusTip(tr("Toggle the cpu registers display"));
 	viewRegistersAction->setCheckable(true);
 
+	viewBreakpointsAction = new QAction(tr("Debug &List"), this);
+	viewBreakpointsAction->setStatusTip(tr("Toggle the breakpoints/watchpoints display"));
+	viewBreakpointsAction->setCheckable(true);
+
 	viewFlagsAction = new QAction(tr("CPU &Flags"), this);
 	viewFlagsAction->setStatusTip(tr("Toggle the cpu flags display"));
 	viewFlagsAction->setCheckable(true);
@@ -366,6 +371,7 @@ void DebuggerForm::createActions()
 	connect(systemPreferencesAction, SIGNAL(triggered()), this, SLOT(systemPreferences()));
 	connect(searchGotoAction, SIGNAL(triggered()), this, SLOT(searchGoto()));
 	connect(viewRegistersAction, SIGNAL(triggered()), this, SLOT(toggleRegisterDisplay()));
+	connect(viewBreakpointsAction, SIGNAL(triggered()), this, SLOT(toggleBreakpointsDisplay()));
 	connect(viewFlagsAction, SIGNAL(triggered()), this, SLOT(toggleFlagsDisplay()));
 	connect(viewStackAction, SIGNAL(triggered()), this, SLOT(toggleStackDisplay()));
 	connect(viewSlotsAction, SIGNAL(triggered()), this, SLOT(toggleSlotsDisplay()));
@@ -429,6 +435,7 @@ void DebuggerForm::createMenus()
 	viewMenu->addAction(viewStackAction);
 	viewMenu->addAction(viewSlotsAction);
 	viewMenu->addAction(viewMemoryAction);
+	viewMenu->addAction(viewBreakpointsAction);
 	viewVDPDialogsMenu = viewMenu->addMenu("VDP");
 	viewMenu->addSeparator();
 	viewFloatingWidgetsMenu = viewMenu->addMenu("Floating widgets:");
@@ -544,6 +551,19 @@ void DebuggerForm::createForm()
 	        mainMemoryView, SLOT(refresh()));
 	mainMemoryView->setSymbolTable(&session.symbolTable());
 
+	// create breakpoints viewer
+	bpView = new BreakpointViewer(this);
+	dw = new DockableWidget(dockMan);
+	dw->setWidget(bpView);
+	dw->setTitle(tr("Debug list"));
+	dw->setId("DEBUG");
+	dw->setFloating(false);
+	dw->setDestroyable(false);
+	dw->setMovable(true);
+	dw->setClosable(true);
+	connect(dw, SIGNAL(visibilityChanged(DockableWidget*)),
+	        this, SLOT(dockWidgetVisibilityChanged(DockableWidget*)));
+
 	// create register viewer
 	regsView = new CPURegsViewer();
 	dw = new DockableWidget(dockMan);
@@ -561,7 +581,6 @@ void DebuggerForm::createForm()
 	connect(regsView, SIGNAL(registerChanged(int,int)),
 	        mainMemoryView, SLOT(registerChanged(int,int)));
 	mainMemoryView->setRegsView(regsView);
-
 
 	// create flags viewer
 	flagsView = new FlagsViewer();
@@ -618,15 +637,16 @@ void DebuggerForm::createForm()
 		list.append("FLAGS D V R 0 -1 -1");
 		int regW  = dockMan.findDockableWidget("REGISTERS")->sizeHint().width();
 		int regH  = dockMan.findDockableWidget("REGISTERS")->sizeHint().height();
+		list.append(QString("SLOTS D V R 0 -1 %1").arg(regH));
 		int codeW = dockMan.findDockableWidget("CODEVIEW")->sizeHint().width();
 		int codeH = dockMan.findDockableWidget("CODEVIEW")->sizeHint().height();
 		int flagW = dockMan.findDockableWidget("FLAGS")->sizeHint().width();
 		int slotW = dockMan.findDockableWidget("SLOTS")->sizeHint().width();
-		list.append(QString("SLOTS D V R 0 -1 %1").arg(regH));
 		list.append(QString("STACK D V R 0 -1 %1").arg(codeH));
 		list.append(QString("MEMORY D V B %1 %2 %3").arg(codeW)
 		                                             .arg(regW + flagW + slotW)
 		                                             .arg(codeH - regH));
+		list.append(QString("DEBUG D V B %1 -1 -1").arg(codeW));
 	}
 
 	// add widgets
@@ -683,6 +703,7 @@ void DebuggerForm::createForm()
 	session.breakpoints().setMemoryLayout(&memLayout);
 	mainMemory = new unsigned char[65536 + 4];
 	memset(mainMemory, 0, 65536 + 4);
+	bpView->setBreakpoints(&session.breakpoints());
 	disasmView->setMemory(mainMemory);
 	disasmView->setBreakpoints(&session.breakpoints());
 	disasmView->setMemoryLayout(&memLayout);
@@ -1203,6 +1224,11 @@ void DebuggerForm::showAbout()
 		this, "openMSX Debugger", QString(Version::full().c_str()));
 }
 
+void DebuggerForm::toggleBreakpointsDisplay()
+{
+	toggleView(qobject_cast<DockableWidget*>(bpView->parentWidget()));
+}
+
 void DebuggerForm::toggleRegisterDisplay()
 {
 	toggleView(qobject_cast<DockableWidget*>(regsView->parentWidget()));
@@ -1413,6 +1439,7 @@ void DebuggerForm::updateViewMenu()
 	viewStackAction->setChecked(stackView->isVisible());
 	viewSlotsAction->setChecked(slotView->isVisible());
 	viewMemoryAction->setChecked(mainMemoryView->isVisible());
+	viewBreakpointsAction->setChecked(bpView->isVisible());
 }
 
 void DebuggerForm::updateVDPViewMenu()

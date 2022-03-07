@@ -20,10 +20,11 @@ class QToolBar;
 class VDPStatusRegViewer;
 class VDPRegViewer;
 class VDPCommandRegViewer;
+class BreakpointViewer;
 
 class DebuggerForm : public QMainWindow
 {
-	Q_OBJECT;
+	Q_OBJECT
 public:
 	DebuggerForm(QWidget* parent = nullptr);
 	~DebuggerForm() override;
@@ -93,6 +94,7 @@ private:
 	QAction* viewStackAction;
 	QAction* viewSlotsAction;
 	QAction* viewMemoryAction;
+	QAction* viewBreakpointsAction;
 	QAction* viewDebuggableViewerAction;
 
 	QAction* viewBitMappedAction;
@@ -128,6 +130,7 @@ private:
 	VDPStatusRegViewer* VDPStatusRegView;
 	VDPRegViewer* VDPRegView;
 	VDPCommandRegViewer* VDPCommandRegView;
+	BreakpointViewer* bpView;
 
 	CommClient& comm;
 	DebugSession session;
@@ -152,6 +155,7 @@ private slots:
 	void systemSymbolManager();
 	void systemPreferences();
 	void searchGoto();
+	void toggleBreakpointsDisplay();
 	void toggleRegisterDisplay();
 	void toggleFlagsDisplay();
 	void toggleStackDisplay();
