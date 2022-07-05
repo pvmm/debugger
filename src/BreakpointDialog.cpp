@@ -17,7 +17,7 @@ BreakpointDialog::BreakpointDialog(const MemoryLayout& ml, DebugSession* session
 		jumpCompleter->setCaseSensitivity(Qt::CaseInsensitive);
 		allCompleter->setCaseSensitivity(Qt::CaseInsensitive);
 		connect(jumpCompleter.get(), qOverload<const QString&>(&QCompleter::activated), this, &BreakpointDialog::addressChanged);
-		connect(allCompleter.get(),  qOverload<const QString&>(&QCompleter::activated), this, &BreakpointDialog::addressChanged);
+		connect(allCompleter.get(), qOverload<const QString&>(&QCompleter::activated), this, &BreakpointDialog::addressChanged);
 	}
 
 	connect(edtAddress, &QLineEdit::textEdited, this, &BreakpointDialog::addressChanged);

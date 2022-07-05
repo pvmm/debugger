@@ -3,6 +3,8 @@
 
 #include "ui_BreakpointViewer.h"
 #include "DebuggerData.h"
+#include "DebugSession.h"
+#include <QCompleter>
 #include <QList>
 #include <QTabWidget>
 #include <optional>
@@ -24,7 +26,8 @@ class BreakpointViewer : public QTabWidget, private Ui::BreakpointViewer
 {
 	Q_OBJECT
 public:
-	BreakpointViewer(QWidget* parent = nullptr);
+	BreakpointViewer(DebugSession* session, QWidget* parent = nullptr);
+	void setDebugSession(DebugSession* session);
 	void setBreakpoints(Breakpoints* bps);
 
 	void on_btnAddBp_clicked();
@@ -43,6 +46,9 @@ signals:
 
 private:
 	void setTextField(BreakpointRef::Type type, int row, int column, const QString& value);
+
+	std::optional<AddressRange> parseSymbolOrValue(const QString& field);
+
 	std::optional<AddressRange> parseLocationField(std::optional<int> index,
 	                                               BreakpointRef::Type type,
 	                                               const QString& field,
@@ -71,6 +77,7 @@ private:
 	void onAddBtnClicked(BreakpointRef::Type type);
 	void onRemoveBtnClicked(BreakpointRef::Type type);
 	void stretchTable(BreakpointRef::Type type = BreakpointRef::ALL);
+	void onLocationChanged(const QString& text);
 
 	BreakpointRef* scanBreakpointRef(BreakpointRef::Type type, int row);
 	BreakpointRef* findBreakpointRef(BreakpointRef::Type type, int row);
@@ -86,6 +93,7 @@ private:
 
 private:
 	Ui::BreakpointViewer* ui;
+	DebugSession* debugSession;
 	QTableWidget* tables[BreakpointRef::ALL];
 	std::map<QString, BreakpointRef> maps[BreakpointRef::ALL];
 
@@ -94,6 +102,8 @@ private:
 	bool runState;
 	bool conditionsMsg = false;
 	Breakpoints* breakpoints;
+	std::unique_ptr<QCompleter> jumpCompleter;
+	std::unique_ptr<QCompleter> allCompleter;
 };
 
 #endif // BREAKPOINTVIEWER_H
