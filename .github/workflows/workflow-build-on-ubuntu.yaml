@@ -1,0 +1,34 @@
+name: Build workflow
+
+on:
+  workflow_call:
+
+env:
+  package_origin: gh
+
+jobs:
+  build-on-ubuntu:
+    runs-on: ubuntu-latest
+    name: Ubuntu builder
+    steps:
+    - name: Configure base system
+      run: |
+        git config --global init.defaultBranch master
+    - name: Checkout repository code
+      uses: actions/checkout@v3
+    - name: Compile repository code
+      id: compile
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install qtbase5-dev qt5-qmake
+        path=derived/bin
+        echo "path=$path" >> $GITHUB_OUTPUT
+        echo "name=openmsx-debugger-ubuntu-${{ env.package_origin }}" >> $GITHUB_OUTPUT
+        make
+    - name: Upload redistributable package for ${{ matrix.os }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: openmsx-debugger-ubuntu-${{ env.package_origin }}
+        path: |
+          ${{ steps.compile.outputs.path }}

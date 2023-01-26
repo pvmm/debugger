@@ -5,13 +5,20 @@ on:
     branches:
       - master
 
+env:
+  ACTIONS_RUNNER_DEBUG: true
+
 jobs:
-  build:
-    uses: ./.github/workflows/workflow-build.yaml
+  build-on-windows:
+    uses: ./.github/workflows/workflow-build-on-windows.yaml
+  build-on-macos:
+    uses: ./.github/workflows/workflow-build-on-macos.yaml
+  build-on-ubuntu:
+    uses: ./.github/workflows/workflow-build-on-ubuntu.yaml
   nightly:
-    name: Release nightly packages
+    name: Release packages automatically on push
     runs-on: ubuntu-latest
-    needs: build
+    needs: [build-on-windows, build-on-macos, build-on-ubuntu]
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -20,39 +27,49 @@ jobs:
       - name: Get variables
         id: get-targets
         run: |
-          echo "prerelease=${{ needs.build.outputs.prerelease }}" >> $GITHUB_OUTPUT
-          echo "draft=${{ needs.build.outputs.draft }}" >> $GITHUB_OUTPUT
-          echo "name=${{ needs.build.outputs.name }}" >> $GITHUB_OUTPUT
-          debian_target=$(find . -maxdepth 1 -type d -name "*-debian-*" -printf %f)
-          mingw_target=$(find . -maxdepth 1 -type d -name "*-mingw-*" -printf %f)
-          echo "target_debian=$target_debian" >> $GITHUB_OUTPUT
-          echo "target_mingw=$target_mingw" >> $GITHUB_OUTPUT
-          if [ "$debian_target" = "" ]; then
-            echo "Target name 'mingw_target' not defined"
+          find . -print
+          windows_path=$(find . -maxdepth 1 -type d -name "openmsx-debugger-windows-*" -printf %f)
+          echo "windows_path=$windows_path" >> $GITHUB_OUTPUT
+          if [ "$windows_path" = "" ]; then
+            echo "Windows package not found"
             exit 1
           fi
-          if [ "$mingw_target" = "" ]; then
-            echo "Target name 'debian_target' not defined"
+          macos_path=$(find . -maxdepth 1 -type d -name "openmsx-debugger-macos-*" -printf %f)
+          echo "macos_path=$macos_path" >> $GITHUB_OUTPUT
+          if [ "$macos_path" = "" ]; then
+            echo "Mac OS package not found"
             exit 1
           fi
-          echo "debian_target=$debian_target" >> $GITHUB_OUTPUT
-          echo "mingw_target=$mingw_target" >> $GITHUB_OUTPUT
+          ubuntu_path=$(find . -maxdepth 1 -type d -name "openmsx-debugger-ubuntu-*" -printf %f)
+          echo "ubuntu_path=$ubuntu_path" >> $GITHUB_OUTPUT
+          if [ "$ubuntu_path" = "" ]; then
+            echo "Ubuntu package not found"
+            exit 1
+          fi
       - name: Package binaries as zip files
         run: |
-          cd ${{ steps.get-targets.outputs.debian_target }}
-          zip "${{ steps.get-targets.outputs.debian_target }}.zip" -r .
+          cd ${{ steps.get-targets.outputs.windows_path }}
+          zip "${{ steps.get-targets.outputs.windows_path }}.zip" -r .
           cd ..
-          cd ${{ steps.get-targets.outputs.mingw_target }}
-          zip "${{ steps.get-targets.outputs.mingw_target }}.zip" -r .
+          mv ${{ steps.get-targets.outputs.windows_path }}/${{ steps.get-targets.outputs.windows_path }}.zip .
+          cd ${{ steps.get-targets.outputs.macos_path }}
+          zip "${{ steps.get-targets.outputs.macos_path }}.zip" -r .
           cd ..
-          mv ${{ steps.get-targets.outputs.debian_target }}/${{ steps.get-targets.outputs.debian_target }}.zip .
-          mv ${{ steps.get-targets.outputs.mingw_target }}/${{ steps.get-targets.outputs.mingw_target }}.zip .
+          mv ${{ steps.get-targets.outputs.macos_path }}/${{ steps.get-targets.outputs.macos_path }}.zip .
+          cd ${{ steps.get-targets.outputs.ubuntu_path }}
+          zip "${{ steps.get-targets.outputs.ubuntu_path }}.zip" -r .
+          cd ..
+          mv ${{ steps.get-targets.outputs.ubuntu_path }}/${{ steps.get-targets.outputs.ubuntu_path }}.zip .
 
+  release:
+    runs-on: ubuntu-latest
+    needs: nightly
+    steps:
       - name: Create info file
         run: |
-           echo "ref: ${GITHUB_REF}" > info.txt
-           echo "commit: ${GITHUB_SHA}" >> info.txt
-           echo "build: $(date +"%Y-%m-%dT%H:%M:%SZ")" >> info.txt
+          echo "ref: ${GITHUB_REF}" > info.txt
+          echo "commit: ${GITHUB_SHA}" >> info.txt
+          echo "build: $(date +"%Y-%m-%dT%H:%M:%SZ")" >> info.txt
 
       - name: Update nightly release
         uses: eine/tip@master
@@ -61,3 +78,4 @@ jobs:
           rm: true
           token: ${{ secrets.GITHUB_TOKEN }}
           files: info.txt *.zip
+

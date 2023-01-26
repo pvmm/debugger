@@ -25,8 +25,10 @@ jobs:
           echo "name=${{ needs.build.outputs.name }}" >> $GITHUB_OUTPUT
           debian_target=$(find . -maxdepth 1 -type d -name "*-debian-*" -printf %f)
           mingw_target=$(find . -maxdepth 1 -type d -name "*-mingw-*" -printf %f)
+          macos_target=$(find . -maxdepth 1 -type d -name "*-macos-*" -printf %f)
           echo "target_debian=$target_debian" >> $GITHUB_OUTPUT
           echo "target_mingw=$target_mingw" >> $GITHUB_OUTPUT
+          echo "target_macos=$target_macos" >> $GITHUB_OUTPUT
           if [ "$debian_target" = "" ]; then
             echo "Target name 'mingw_target' not defined"
             exit 1
@@ -35,8 +37,13 @@ jobs:
             echo "Target name 'debian_target' not defined"
             exit 1
           fi
+          if [ "$macos_target" = "" ]; then
+            echo "Target name 'macos_target' not defined"
+            exit 1
+          fi
           echo "debian_target=$debian_target" >> $GITHUB_OUTPUT
           echo "mingw_target=$mingw_target" >> $GITHUB_OUTPUT
+          echo "macos_target=$macos_target" >> $GITHUB_OUTPUT
       - name: Package binaries as zip files
         run: |
           cd ${{ steps.get-targets.outputs.debian_target }}
@@ -45,8 +52,12 @@ jobs:
           cd ${{ steps.get-targets.outputs.mingw_target }}
           zip "${{ steps.get-targets.outputs.mingw_target }}.zip" -r .
           cd ..
+          cd ${{ steps.get-targets.outputs.macos_target }}
+          zip "${{ steps.get-targets.outputs.macos_target }}.zip" -r .
+          cd ..
           mv ${{ steps.get-targets.outputs.debian_target }}/${{ steps.get-targets.outputs.debian_target }}.zip .
           mv ${{ steps.get-targets.outputs.mingw_target }}/${{ steps.get-targets.outputs.mingw_target }}.zip .
+          mv ${{ steps.get-targets.outputs.macos_target }}/${{ steps.get-targets.outputs.macos_target }}.zip .
       - name: Publish binaries as artifacts
         uses: ncipollo/release-action@v1
         with:
