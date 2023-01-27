@@ -7,7 +7,7 @@ env:
   package_origin: gh
 
 jobs:
-  build-on-windows:
+  build-windows:
     runs-on: ubuntu-latest
     name: Windows builder
     container:

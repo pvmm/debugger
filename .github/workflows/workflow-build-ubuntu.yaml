@@ -7,9 +7,9 @@ env:
   package_origin: gh
 
 jobs:
-  build-on-macos:
-    runs-on: macos-latest
-    name: Mac OS builder
+  build-ubuntu:
+    runs-on: ubuntu-latest
+    name: Ubuntu builder
     steps:
     - name: Configure base system
       run: |
@@ -20,15 +20,15 @@ jobs:
       id: compile
       shell: bash
       run: |
-        brew install qt@5
-        path=derived/openMSX_Debugger.app
+        sudo apt-get update
+        sudo apt-get install qtbase5-dev qt5-qmake
+        path=derived/bin
         echo "path=$path" >> $GITHUB_OUTPUT
-        echo "name=openmsx-debugger-macos-${{ env.package_origin }}" >> $GITHUB_OUTPUT
+        echo "name=openmsx-debugger-ubuntu-${{ env.package_origin }}" >> $GITHUB_OUTPUT
         make
-    - name: Upload redistributable package for Mac OS
+    - name: Upload redistributable package for ${{ matrix.os }}
       uses: actions/upload-artifact@v3
       with:
-        name: openmsx-debugger-macos-${{ env.package_origin }}
+        name: openmsx-debugger-ubuntu-${{ env.package_origin }}
         path: |
           ${{ steps.compile.outputs.path }}
-

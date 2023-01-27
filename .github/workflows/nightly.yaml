@@ -9,16 +9,16 @@ env:
   ACTIONS_RUNNER_DEBUG: true
 
 jobs:
-  build-on-windows:
-    uses: ./.github/workflows/workflow-build-on-windows.yaml
-  build-on-macos:
-    uses: ./.github/workflows/workflow-build-on-macos.yaml
-  build-on-ubuntu:
-    uses: ./.github/workflows/workflow-build-on-ubuntu.yaml
+  build-windows:
+    uses: ./.github/workflows/workflow-build-windows.yaml
+  build-macos:
+    uses: ./.github/workflows/workflow-build-macos.yaml
+  build-ubuntu:
+    uses: ./.github/workflows/workflow-build-ubuntu.yaml
   nightly:
     name: Release packages automatically on push
     runs-on: ubuntu-latest
-    needs: [build-on-windows, build-on-macos, build-on-ubuntu]
+    needs: [build-windows, build-macos, build-ubuntu]
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -46,20 +46,22 @@ jobs:
             echo "Ubuntu package not found"
             exit 1
           fi
-      - name: Package binaries as zip files
+      - name: Package Windows binaries as zip files
         run: |
+          # Windows packaging
           cd ${{ steps.get-targets.outputs.windows_path }}
           zip "${{ steps.get-targets.outputs.windows_path }}.zip" -r .
           cd ..
           mv ${{ steps.get-targets.outputs.windows_path }}/${{ steps.get-targets.outputs.windows_path }}.zip .
-          cd ${{ steps.get-targets.outputs.macos_path }}
-          zip "${{ steps.get-targets.outputs.macos_path }}.zip" -r .
-          cd ..
-          mv ${{ steps.get-targets.outputs.macos_path }}/${{ steps.get-targets.outputs.macos_path }}.zip .
-          cd ${{ steps.get-targets.outputs.ubuntu_path }}
-          zip "${{ steps.get-targets.outputs.ubuntu_path }}.zip" -r .
-          cd ..
-          mv ${{ steps.get-targets.outputs.ubuntu_path }}/${{ steps.get-targets.outputs.ubuntu_path }}.zip .
+      - name: Package Ubuntu binaries as tbz files
+        run: |
+          # Ubuntu packaging
+          cd "${{ steps.get-targets.outputs.ubuntu_path }}"
+          tar cvfj "/tmp/${{ steps.get-targets.outputs.ubuntu_path }}.tbz" .
+      - name: Package Mac OS binaries as tbz files
+        run: |
+          # Mac OS packaging
+          tar cvfj "/tmp/${{ steps.get-targets.outputs.macos_path }}.tbz" "${{ steps.get-targets.outputs.macos_path }}"
 
   release:
     runs-on: ubuntu-latest
@@ -77,5 +79,5 @@ jobs:
           tag: nightly
           rm: true
           token: ${{ secrets.GITHUB_TOKEN }}
-          files: info.txt *.zip
+          files: info.txt /tmp/*.tbz
 
