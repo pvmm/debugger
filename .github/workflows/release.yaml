@@ -6,8 +6,16 @@ on:
       - 'v*.*.*'
 
 jobs:
+  build-windows:
+    uses: ./.github/workflows/workflow-build-windows.yaml
+  build-macos:
+    uses: ./.github/workflows/workflow-build-macos.yaml
+  build-ubuntu:
+    uses: ./.github/workflows/workflow-build-ubuntu.yaml
   build:
-    uses: ./.github/workflows/workflow-build.yaml
+    name: Release packages automatically when pushed a v*.*.* version tag
+    runs-on: ubuntu-latest
+    needs: [build-windows, build-macos, build-ubuntu]
   release:
     name: Release project packages
     runs-on: ubuntu-latest
