@@ -119,6 +119,7 @@ BINARY_FULL:=$(BINARY_PATH)/$(BINARY_FILE)
 VERSION_SCRIPT:=build/version2code.py
 VERSION_HEADER:=$(BUILD_PATH)/config/Version.ii
 GENERATED_HEADERS:=$(VERSION_HEADER)
+PACKAGE_DETAILED_VERSION=$(shell grep -oP 'Package version: \K\S+' ../derived/version.log)
 
 
 # Filesets
@@ -212,7 +213,9 @@ endif
 .PHONY: forceversionextraction
 forceversionextraction:
 $(VERSION_HEADER): forceversionextraction
-	@$(PYTHON) $(VERSION_SCRIPT) $@
+	$(PYTHON) $(VERSION_SCRIPT) $@
+
+
 
 # Default target.
 ifeq ($(OPENMSX_TARGET_OS),darwin)
@@ -343,10 +346,10 @@ $(DEPEND_FULL):
 # Windows resources that are added to the executable.
 ifeq ($(OPENMSX_TARGET_OS),mingw32)
 $(RESOURCE_HEADER): forceversionextraction
-	@$(PYTHON) $(RESOURCE_SCRIPT) $@
+	$(PYTHON) $(RESOURCE_SCRIPT) $@
 $(RESOURCE_OBJ): $(RESOURCE_SRC) $(RESOURCE_HEADER)
-	@echo "Compiling resources..."
-	@mkdir -p $(@D)
+	echo "Compiling resources..."
+	mkdir -p $(@D)
 	@$(WINDRES) $(addprefix --include-dir=,$(^D)) -o $@ -i $<
 endif
 
@@ -370,8 +373,10 @@ $(PKGINFO_FULL):
 	@echo "APPLoMXD" > $@
 
 $(APP_PLIST): $(APP_PATH)/Contents/%: $(APP_SUPPORT_PATH)/%
+	# FIXME
 	@echo "Generating $(@F)..."
 	@mkdir -p $(@D)
+	echo $(PACKAGE_DETAILED_VERSION)
 	@sed -e 's/%ICON%/$(notdir $(APP_ICON))/' \
 		-e 's/%VERSION%/$(PACKAGE_DETAILED_VERSION)/' < $< > $@
 

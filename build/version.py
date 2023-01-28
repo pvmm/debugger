@@ -57,6 +57,8 @@ def extractRevision():
 	if not isdir('derived'):
 		makedirs('derived')
 	log = open('derived/version.log', 'w')
+	print('Extracting version info...', file = log)
+	print('Package version: %s' % packageVersion, file = log)
 	print('Extracting revision info...', file = log)
 	try:
 		revision = extractGitRevision(log)
