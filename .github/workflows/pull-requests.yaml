@@ -1,4 +1,4 @@
-name: Build only
+name: Build on pull request
 
 on:
   pull_request:
@@ -12,7 +12,3 @@ jobs:
     uses: ./.github/workflows/workflow-build-macos.yaml
   build-ubuntu:
     uses: ./.github/workflows/workflow-build-ubuntu.yaml
-  build:
-    name: Create packages automatically on pull request
-    runs-on: ubuntu-latest
-    needs: [build-windows, build-macos, build-ubuntu]
