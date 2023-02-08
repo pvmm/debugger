@@ -36,6 +36,7 @@ public:
 	void reloadBreakpoints(bool merge = false);
 	void onSlotsUpdated(bool slotsChanged);
 	void onPCChanged(uint16_t address);
+    bool containsDebuggables(const QString& debuggable) const;
 
 private:
 	void closeEvent(QCloseEvent* e) override;

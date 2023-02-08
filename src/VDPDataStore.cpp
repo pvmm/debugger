@@ -53,35 +53,6 @@ private:
 	VDPDataStore& dataStore;
 };
 
-class VDPDataStoreDebuggableChecks : public SimpleCommand
-{
-public:
-	VDPDataStoreDebuggableChecks(VDPDataStore& dataStore_)
-		: SimpleCommand("debug_check_debuggables {{VDP register latch status} {VDP palette latch status} {VDP data latch value}}")
-		, dataStore(dataStore_)
-	{
-	}
-
-	void replyOk(const QString& message) override
-	{
-		assert(message.size() == 5);
-		QStringList s = message.split(' ');
-		dataStore.registerLatchAvailable = s[0] == '1';
-		dataStore.paletteLatchAvailable = s[1] == '1';
-		dataStore.dataLatchAvailable = s[2] == '1';
-		dataStore.refresh3();
-		delete this;
-	}
-	void replyNok(const QString& /*message*/) override
-	{
-		dataStore.refresh3();
-		delete this;
-	}
-
-private:
-	VDPDataStore& dataStore;
-};
-
 static constexpr unsigned MAX_VRAM_SIZE = 0x30000;
 static constexpr unsigned MAX_TOTAL_SIZE = MAX_VRAM_SIZE + 32 + 16 + 64 + 2 + 3;
 
@@ -116,11 +87,10 @@ void VDPDataStore::refresh1()
 
 void VDPDataStore::refresh2()
 {
-	CommClient::instance().sendCommand(new VDPDataStoreDebuggableChecks(*this));
-}
+    dataStore.registerLatchAvailable = s[0] == '1';
+    dataStore.paletteLatchAvailable = s[1] == '1';
+    dataStore.dataLatchAvailable = s[2] == '1';
 
-void VDPDataStore::refresh3()
-{
 	QString req = QString(
 		"debug_bin2hex "
 		"[debug read_block {" + QString::fromStdString(*debuggableNameVRAM) + "} 0 " + QString::number(vramSize) + "]"

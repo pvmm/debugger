@@ -1459,6 +1459,11 @@ void DebuggerForm::setDebuggables(const QString& list)
 	}
 }
 
+bool DebuggerForm::containsDebuggable(const QString &debuggable) const
+{
+    return debuggable.contains(debuggable);
+}
+
 void DebuggerForm::setDebuggableSize(const QString& debuggable, int size)
 {
 	debuggables[debuggable] = size;
