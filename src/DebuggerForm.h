@@ -74,6 +74,7 @@ private:
 	QMenu* viewFloatingWidgetsMenu;
 	QMenu* executeMenu;
 	QMenu* breakpointMenu;
+	QMenu* controlMenu;
 	QMenu* helpMenu;
 
 	QToolBar* systemToolbar;
@@ -123,6 +124,8 @@ private:
 
 	QAction* breakpointToggleAction;
 	QAction* breakpointAddAction;
+
+    QAction* controlAction;
 
 	QAction* helpAboutAction;
 
@@ -190,6 +193,8 @@ private:
 	void toggleBreakpoint();
 	void toggleBreakpointAddress(uint16_t addr);
 	void addBreakpoint();
+
+    void manageControlButtons();
 
 	void toggleView(DockableWidget* widget);
 	void initConnection();

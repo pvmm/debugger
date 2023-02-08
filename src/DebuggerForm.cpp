@@ -15,6 +15,7 @@
 #include "SymbolManager.h"
 #include "PreferencesDialog.h"
 #include "BreakpointDialog.h"
+#include "ControlDialog.h"
 #include "GotoDialog.h"
 #include "DebuggableViewer.h"
 #include "VDPRegViewer.h"
@@ -329,6 +330,10 @@ void DebuggerForm::createActions()
 	breakpointToggleAction->setIcon(QIcon(":/icons/break.png"));
 	breakpointToggleAction->setEnabled(false);
 
+	controlAction = new QAction(tr("Manage control buttons..."), this);
+	controlAction->setStatusTip(tr("Add new Tcl-scripted button"));
+	controlAction->setEnabled(false);
+
 	breakpointAddAction = new QAction(tr("Add ..."), this);
 	breakpointAddAction->setShortcut(tr("CTRL+B"));
 	breakpointAddAction->setStatusTip(tr("Add a breakpoint at a location"));
@@ -371,6 +376,7 @@ void DebuggerForm::createActions()
 	connect(executeStepBackAction, &QAction::triggered, this, &DebuggerForm::executeStepBack);
 	connect(breakpointToggleAction, &QAction::triggered, this, &DebuggerForm::toggleBreakpoint);
 	connect(breakpointAddAction, &QAction::triggered, this, &DebuggerForm::addBreakpoint);
+	connect(controlAction, &QAction::triggered, this, &DebuggerForm::manageControlButtons);
 	connect(helpAboutAction, &QAction::triggered, this, &DebuggerForm::showAbout);
 }
 
@@ -448,6 +454,10 @@ void DebuggerForm::createMenus()
 	breakpointMenu = menuBar()->addMenu(tr("&Breakpoint"));
 	breakpointMenu->addAction(breakpointToggleAction);
 	breakpointMenu->addAction(breakpointAddAction);
+
+	// create 
+	controlMenu = menuBar()->addMenu("&Controls");
+	controlMenu->addAction(controlAction);
 
 	// create help menu
 	helpMenu = menuBar()->addMenu(tr("&Help"));
@@ -873,6 +883,7 @@ void DebuggerForm::connectionClosed()
 	systemConnectAction->setEnabled(true);
 	breakpointToggleAction->setEnabled(false);
 	breakpointAddAction->setEnabled(false);
+	controlAction->setEnabled(false);
 
 	for (auto* w : dockMan.managedWidgets()) {
 		w->widget()->setEnabled(false);
@@ -885,6 +896,8 @@ void DebuggerForm::finalizeConnection(bool halted)
 	systemRebootAction->setEnabled(true);
 	breakpointToggleAction->setEnabled(true);
 	breakpointAddAction->setEnabled(true);
+	controlAction->setEnabled(true);
+
 	// merge breakpoints on connect
 	mergeBreakpoints = true;
 	if (halted) {
@@ -902,7 +915,7 @@ void DebuggerForm::finalizeConnection(bool halted)
 }
 
 void DebuggerForm::handleUpdate(const QString& type, const QString& name,
-                                const QString& message)
+	                            const QString& message)
 {
 	if (type == "status") {
 		if (name == "cpu") {
@@ -1177,6 +1190,14 @@ void DebuggerForm::addBreakpoint()
 			// Get results of command above
 			reloadBreakpoints();
 		}
+	}
+}
+
+void DebuggerForm::manageControlButtons()
+{
+	ControlDialog cd(this);
+	if (cd.exec()) {
+		// do stuff
 	}
 }
 
