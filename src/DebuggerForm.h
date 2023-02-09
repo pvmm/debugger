@@ -5,6 +5,7 @@
 #include "DockManager.h"
 #include "DebugSession.h"
 #include "SymbolManager.h"
+#include "ControlDialog.h"
 #include <QMainWindow>
 #include <QMap>
 #include <QPointer>
@@ -25,6 +26,7 @@ class VDPStatusRegViewer;
 class VDPRegViewer;
 class VDPCommandRegViewer;
 class BreakpointViewer;
+
 
 class DebuggerForm : public QMainWindow
 {
@@ -76,9 +78,11 @@ private:
 	QMenu* breakpointMenu;
 	QMenu* controlMenu;
 	QMenu* helpMenu;
+	QDialog* controlDialog;
 
 	QToolBar* systemToolbar;
 	QToolBar* executeToolbar;
+	QToolBar* userToolbar;
 
 	QAction* fileNewSessionAction;
 	QAction* fileOpenSessionAction;
@@ -124,9 +128,7 @@ private:
 
 	QAction* breakpointToggleAction;
 	QAction* breakpointAddAction;
-
-    QAction* controlAction;
-
+	QAction* controlAction;
 	QAction* helpAboutAction;
 
 	DockManager dockMan;
@@ -156,6 +158,9 @@ private:
 	static int counter;
 	enum {RESET = 0, SLOTS_CHECKED, PC_CHANGED, SLOTS_CHANGED} disasmStatus = RESET;
 	uint16_t disasmAddress;
+
+	QMap<QString, ControlRef> controls;
+	void updateCustomActions();
 
 	void fileNewSession();
 	void fileOpenSession();
@@ -194,7 +199,8 @@ private:
 	void toggleBreakpointAddress(uint16_t addr);
 	void addBreakpoint();
 
-    void manageControlButtons();
+	void manageControlButtons();
+	void manageControlButtonsFinished(int result);
 
 	void toggleView(DockableWidget* widget);
 	void initConnection();

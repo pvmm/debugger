@@ -40,6 +40,8 @@
 #include <QFileDialog>
 #include <QCloseEvent>
 #include <iostream>
+
+
 class QueryPauseHandler : public SimpleCommand
 {
 public:
@@ -485,6 +487,23 @@ void DebuggerForm::createToolbars()
 	executeToolbar->addAction(executeStepOutAction);
 	executeToolbar->addAction(executeStepBackAction);
 	executeToolbar->addAction(executeRunToAction);
+
+	// create customised toolbar
+	userToolbar = addToolBar(tr("User defined"));
+	connect(&comm, &CommClient::connectionReady, userToolbar, [this]{ userToolbar->setEnabled(true); });
+	connect(&comm, &CommClient::connectionTerminated, userToolbar, [this]{ userToolbar->setEnabled(false); });
+	updateCustomActions();
+}
+
+void DebuggerForm::updateCustomActions()
+{
+	userToolbar->clear();
+	for (auto control: controls) {
+	        auto* action = new QAction(control.name, this);
+	        action->setStatusTip(control.description);
+		action->setIcon(QIcon(control.icon.isEmpty() ? ":/icons/gear.png" : control.icon));
+		userToolbar->addAction(action);
+	}
 }
 
 void DebuggerForm::createStatusbar()
@@ -1195,10 +1214,15 @@ void DebuggerForm::addBreakpoint()
 
 void DebuggerForm::manageControlButtons()
 {
-	ControlDialog cd(this);
-	if (cd.exec()) {
-		// do stuff
-	}
+	controlDialog = new ControlDialog(controls, this);
+	connect(controlDialog, &QDialog::finished, this, &DebuggerForm::manageControlButtonsFinished);
+	controlDialog->open();
+}
+
+void DebuggerForm::manageControlButtonsFinished(int result)
+{
+	if (result == QDialog::Accepted)
+		updateCustomActions();
 }
 
 void DebuggerForm::showAbout()

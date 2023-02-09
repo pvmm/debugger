@@ -4,26 +4,50 @@
 #include "ui_ControlDialog.h"
 #include <QDialog>
 
+
+struct ControlRef
+{
+    QString name;
+    QString description;
+    QString command;
+    QString icon;
+    int index;
+
+    bool operator<(const ControlRef& ref) const {
+        return index < ref.index;
+    }
+};
+
+
 class ControlDialog : public QDialog, private Ui::ControlDialog
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	ControlDialog(QWidget* parent = nullptr);
+    ControlDialog(QMap<QString, ControlRef>& controls, QWidget* parent = nullptr);
 
     QString icon() const;
     QString name() const;
     QString command() const;
     QString function() const;
-
-	void setData(QString icon, QString name, QString command, QString function);
+    void refresh();
 
 private:
-    void iconChanged(const QString& file);
-    void nameChanged(const QString& name);
-    void commandChanged(const QString& name);
-    void functionChanged(const QString& name);
+    int counter = 0;
+    int currentItem = 0;
 
-	void hasFunction(int state);
+    int createItem();
+    void createControl();
+    void writeControl(ControlRef& control);
+
+    void onSelectedControlChanged(int currentRow, int currentCol, int previousRow, int previousCol);
+    void onAddButtonClicked();
+    void onRemoveButtonClicked();
+    void changeTableItem(QTableWidgetItem* item);
+    void done();
+    void cancel();
+
+    bool userMode = true;
+    QMap<QString, ControlRef>& controls;
 };
 
 #endif // CONTROLDIALOG_OPENMSX_H
