@@ -632,6 +632,9 @@ void DebuggerForm::createForm()
 		                                             .arg(regW + flagW + slotW + stackW));
 	}
 
+	// restore controls
+	restoreControls(Settings::get().value("Controls/TclCommands", saveControls()).toByteArray());
+
 	// add widgets
 	for (int i = 0; i < list.size(); ++i) {
 		QStringList s = list.at(i).split(" ", Qt::SplitBehaviorFlags::SkipEmptyParts);
@@ -720,6 +723,9 @@ void DebuggerForm::closeEvent(QCloseEvent* e)
 		e->ignore();
 		return;
 	}
+
+	// store controls
+	Settings::get().setValue("Controls/TclCommands", saveControls());
 
 	// store layout
 	Settings::get().setValue("Layout/WindowGeometry", saveGeometry());
