@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ControlDialog</class>
- <widget class="QDialog" name="ControlDialog">
+ <class>CommandDialog</class>
+ <widget class="QDialog" name="CommandDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -17,20 +17,20 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Manage control buttons</string>
+   <string>Manage command buttons</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>Debugger controls</string>
+      <string>Debugger commands</string>
      </property>
     </widget>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QTableWidget" name="twControls">
+      <widget class="QTableWidget" name="twCommands">
        <property name="selectionMode">
         <enum>QAbstractItemView::SingleSelection</enum>
        </property>

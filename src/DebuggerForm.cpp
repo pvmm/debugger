@@ -15,7 +15,7 @@
 #include "SymbolManager.h"
 #include "PreferencesDialog.h"
 #include "BreakpointDialog.h"
-#include "ControlDialog.h"
+#include "CommandDialog.h"
 #include "GotoDialog.h"
 #include "DebuggableViewer.h"
 #include "VDPRegViewer.h"
@@ -332,9 +332,9 @@ void DebuggerForm::createActions()
 	breakpointToggleAction->setIcon(QIcon(":/icons/break.png"));
 	breakpointToggleAction->setEnabled(false);
 
-	controlAction = new QAction(tr("Manage control buttons..."), this);
-	controlAction->setStatusTip(tr("Add new Tcl-scripted button"));
-	controlAction->setEnabled(false);
+	commandAction = new QAction(tr("Manage command buttons..."), this);
+	commandAction->setStatusTip(tr("Add new Tcl-scripted command button"));
+	commandAction->setEnabled(false);
 
 	breakpointAddAction = new QAction(tr("Add ..."), this);
 	breakpointAddAction->setShortcut(tr("CTRL+B"));
@@ -378,7 +378,7 @@ void DebuggerForm::createActions()
 	connect(executeStepBackAction, &QAction::triggered, this, &DebuggerForm::executeStepBack);
 	connect(breakpointToggleAction, &QAction::triggered, this, &DebuggerForm::toggleBreakpoint);
 	connect(breakpointAddAction, &QAction::triggered, this, &DebuggerForm::addBreakpoint);
-	connect(controlAction, &QAction::triggered, this, &DebuggerForm::manageControlButtons);
+	connect(commandAction, &QAction::triggered, this, &DebuggerForm::manageCommandButtons);
 	connect(helpAboutAction, &QAction::triggered, this, &DebuggerForm::showAbout);
 }
 
@@ -458,8 +458,8 @@ void DebuggerForm::createMenus()
 	breakpointMenu->addAction(breakpointAddAction);
 
 	// create 
-	controlMenu = menuBar()->addMenu("&Controls");
-	controlMenu->addAction(controlAction);
+	commandMenu = menuBar()->addMenu("&Commands");
+	commandMenu->addAction(commandAction);
 
 	// create help menu
 	helpMenu = menuBar()->addMenu(tr("&Help"));
@@ -498,10 +498,10 @@ void DebuggerForm::createToolbars()
 void DebuggerForm::updateCustomActions()
 {
 	userToolbar->clear();
-	for (auto control: controls) {
-	        auto* action = new QAction(control.name, this);
-	        action->setStatusTip(control.description);
-		action->setIcon(QIcon(control.icon.isEmpty() ? ":/icons/gear.png" : control.icon));
+	for (auto command: commands) {
+	        auto* action = new QAction(command.name, this);
+	        action->setStatusTip(command.description);
+		action->setIcon(QIcon(command.icon.isEmpty() ? ":/icons/gear.png" : command.icon));
 		userToolbar->addAction(action);
 	}
 }
@@ -632,8 +632,8 @@ void DebuggerForm::createForm()
 		                                             .arg(regW + flagW + slotW + stackW));
 	}
 
-	// restore controls
-	restoreControls(Settings::get().value("Controls/TclCommands", saveControls()).toByteArray());
+	// restore commands
+	restoreCommands(Settings::get().value("Commands/Tcl", saveCommands()).toByteArray());
 
 	// add widgets
 	for (int i = 0; i < list.size(); ++i) {
@@ -724,8 +724,8 @@ void DebuggerForm::closeEvent(QCloseEvent* e)
 		return;
 	}
 
-	// store controls
-	Settings::get().setValue("Controls/TclCommands", saveControls());
+	// store commands
+	Settings::get().setValue("Commands/Tcl", saveCommands());
 
 	// store layout
 	Settings::get().setValue("Layout/WindowGeometry", saveGeometry());
@@ -908,7 +908,7 @@ void DebuggerForm::connectionClosed()
 	systemConnectAction->setEnabled(true);
 	breakpointToggleAction->setEnabled(false);
 	breakpointAddAction->setEnabled(false);
-	controlAction->setEnabled(false);
+	commandAction->setEnabled(false);
 
 	for (auto* w : dockMan.managedWidgets()) {
 		w->widget()->setEnabled(false);
@@ -921,7 +921,7 @@ void DebuggerForm::finalizeConnection(bool halted)
 	systemRebootAction->setEnabled(true);
 	breakpointToggleAction->setEnabled(true);
 	breakpointAddAction->setEnabled(true);
-	controlAction->setEnabled(true);
+	commandAction->setEnabled(true);
 
 	// merge breakpoints on connect
 	mergeBreakpoints = true;
@@ -1218,14 +1218,14 @@ void DebuggerForm::addBreakpoint()
 	}
 }
 
-void DebuggerForm::manageControlButtons()
+void DebuggerForm::manageCommandButtons()
 {
-	controlDialog = new ControlDialog(controls, this);
-	connect(controlDialog, &QDialog::finished, this, &DebuggerForm::manageControlButtonsFinished);
-	controlDialog->open();
+	commandDialog = new CommandDialog(commands, this);
+	connect(commandDialog, &QDialog::finished, this, &DebuggerForm::manageCommandButtonsFinished);
+	commandDialog->open();
 }
 
-void DebuggerForm::manageControlButtonsFinished(int result)
+void DebuggerForm::manageCommandButtonsFinished(int result)
 {
 	if (result == QDialog::Accepted)
 		updateCustomActions();

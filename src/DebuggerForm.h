@@ -5,7 +5,7 @@
 #include "DockManager.h"
 #include "DebugSession.h"
 #include "SymbolManager.h"
-#include "ControlDialog.h"
+#include "CommandDialog.h"
 #include <QMainWindow>
 #include <QMap>
 #include <QPointer>
@@ -76,9 +76,9 @@ private:
 	QMenu* viewFloatingWidgetsMenu;
 	QMenu* executeMenu;
 	QMenu* breakpointMenu;
-	QMenu* controlMenu;
+	QMenu* commandMenu;
 	QMenu* helpMenu;
-	QDialog* controlDialog;
+	QDialog* commandDialog;
 
 	QToolBar* systemToolbar;
 	QToolBar* executeToolbar;
@@ -128,7 +128,7 @@ private:
 
 	QAction* breakpointToggleAction;
 	QAction* breakpointAddAction;
-	QAction* controlAction;
+	QAction* commandAction;
 	QAction* helpAboutAction;
 
 	DockManager dockMan;
@@ -159,7 +159,7 @@ private:
 	enum {RESET = 0, SLOTS_CHECKED, PC_CHANGED, SLOTS_CHANGED} disasmStatus = RESET;
 	uint16_t disasmAddress;
 
-	QMap<QString, ControlRef> controls;
+	QMap<QString, CommandRef> commands;
 	void updateCustomActions();
 
 	void fileNewSession();
@@ -199,8 +199,8 @@ private:
 	void toggleBreakpointAddress(uint16_t addr);
 	void addBreakpoint();
 
-	void manageControlButtons();
-	void manageControlButtonsFinished(int result);
+	void manageCommandButtons();
+	void manageCommandButtonsFinished(int result);
 
 	void toggleView(DockableWidget* widget);
 	void initConnection();

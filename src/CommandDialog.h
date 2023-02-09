@@ -1,11 +1,11 @@
 #ifndef CONTROLDIALOG_OPENMSX_H
 #define CONTROLDIALOG_OPENMSX_H
 
-#include "ui_ControlDialog.h"
+#include "ui_CommandDialog.h"
 #include <QDialog>
 
 
-struct ControlRef
+struct CommandRef
 {
     QString name;
     QString description;
@@ -13,17 +13,17 @@ struct ControlRef
     QString icon;
     int index;
 
-    bool operator<(const ControlRef& ref) const {
+    bool operator<(const CommandRef& ref) const {
         return index < ref.index;
     }
 };
 
 
-class ControlDialog : public QDialog, private Ui::ControlDialog
+class CommandDialog : public QDialog, private Ui::CommandDialog
 {
     Q_OBJECT
 public:
-    ControlDialog(QMap<QString, ControlRef>& controls, QWidget* parent = nullptr);
+    CommandDialog(QMap<QString, CommandRef>& commands, QWidget* parent = nullptr);
 
     QString icon() const;
     QString name() const;
@@ -36,10 +36,10 @@ private:
     int currentItem = 0;
 
     int createItem();
-    void createControl();
-    void writeControl(ControlRef& control);
+    void createCommand();
+    void writeCommand(CommandRef& command);
 
-    void onSelectedControlChanged(int currentRow, int currentCol, int previousRow, int previousCol);
+    void onSelectedCommandChanged(int currentRow, int currentCol, int previousRow, int previousCol);
     void onAddButtonClicked();
     void onRemoveButtonClicked();
     void changeTableItem(QTableWidgetItem* item);
@@ -47,7 +47,7 @@ private:
     void cancel();
 
     bool userMode = true;
-    QMap<QString, ControlRef>& controls;
+    QMap<QString, CommandRef>& commands;
 };
 
 #endif // CONTROLDIALOG_OPENMSX_H
