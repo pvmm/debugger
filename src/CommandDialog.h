@@ -9,7 +9,7 @@ struct CommandRef
 {
     QString name;
     QString description;
-    QString command;
+    QString source;
     QString icon;
     int index;
 

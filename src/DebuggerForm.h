@@ -219,6 +219,9 @@ private:
 	void processBreakpoints(const QString& message);
 	void processMerge(const QString& message);
 
+	QByteArray saveCommands() const;
+	void restoreCommands(const QByteArray &input);
+
 	friend class QueryPauseHandler;
 	friend class QueryBreakedHandler;
 	friend class ListBreakPointsHandler;

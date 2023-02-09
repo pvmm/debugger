@@ -5,7 +5,7 @@
 
 
 enum CommandColumns {
-    ICON = 0, NAME, DESCRIPTION, COMMAND, HIDDEN, INDEX, MAX
+    ICON = 0, NAME, DESCRIPTION, SOURCE, HIDDEN, INDEX, MAX
 };
 
 
@@ -79,7 +79,7 @@ int CommandDialog::createItem()
 
     auto* item3 = new QTableWidgetItem();
     item3->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable);
-    twCommands->setItem(row, COMMAND, item3);
+    twCommands->setItem(row, SOURCE, item3);
 
     auto* item4 = new QTableWidgetItem();
     twCommands->setItem(row, HIDDEN, item4);
@@ -113,8 +113,8 @@ void CommandDialog::writeCommand(CommandRef& command)
     auto* item2 = twCommands->item(command.index, DESCRIPTION);
     item2->setText(command.description);
 
-    auto* item3 = twCommands->item(command.index, COMMAND);
-    item3->setText(command.command);
+    auto* item3 = twCommands->item(command.index, SOURCE);
+    item3->setText(command.source);
 
     auto* item4 = twCommands->item(command.index, HIDDEN);
     item4->setText(command.name);
@@ -146,8 +146,8 @@ void CommandDialog::changeTableItem(QTableWidgetItem* item)
             commands[name].description = item->text();
             break;
 
-        case COMMAND:
-            commands[name].command = item->text();
+        case SOURCE:
+            commands[name].source = item->text();
             break;
     }
 }

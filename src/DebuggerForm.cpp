@@ -490,6 +490,7 @@ void DebuggerForm::createToolbars()
 
 	// create customised toolbar
 	userToolbar = addToolBar(tr("User defined"));
+	userToolbar->setEnabled(false);
 	connect(&comm, &CommClient::connectionReady, userToolbar, [this]{ userToolbar->setEnabled(true); });
 	connect(&comm, &CommClient::connectionTerminated, userToolbar, [this]{ userToolbar->setEnabled(false); });
 	updateCustomActions();
@@ -499,9 +500,10 @@ void DebuggerForm::updateCustomActions()
 {
 	userToolbar->clear();
 	for (auto command: commands) {
-	        auto* action = new QAction(command.name, this);
-	        action->setStatusTip(command.description);
+		auto* action = new QAction(command.name, this);
+		action->setStatusTip(command.description);
 		action->setIcon(QIcon(command.icon.isEmpty() ? ":/icons/gear.png" : command.icon));
+		connect(action, &QAction::triggered, [this, command]{ comm.sendCommand(new SimpleCommand(command.source)); });
 		userToolbar->addAction(action);
 	}
 }
@@ -634,6 +636,7 @@ void DebuggerForm::createForm()
 
 	// restore commands
 	restoreCommands(Settings::get().value("Commands/Tcl", saveCommands()).toByteArray());
+	updateCustomActions();
 
 	// add widgets
 	for (int i = 0; i < list.size(); ++i) {
@@ -1585,6 +1588,51 @@ void DebuggerForm::processMerge(const QString& message)
 		reloadBreakpoints(false);
 	} else {
 		processBreakpoints(message);
+	}
+}
+
+QByteArray DebuggerForm::saveCommands() const
+{
+	QByteArray output;
+
+	auto counter = 0;
+	for (auto &command : commands) {
+		auto [name, description, source, icon, _] = command;
+		if (counter > 0) output.append(':');
+		output.append(name.toUtf8().toBase64());
+		output.append(';');
+		output.append(description.toUtf8().toBase64());
+		output.append(';');
+		output.append(source.toUtf8().toBase64());
+		output.append(';');
+		output.append(icon.toUtf8().toBase64());
+		counter++;
+	}
+
+	return output;
+}
+
+void DebuggerForm::restoreCommands(const QByteArray &input)
+{
+	commands.clear();
+
+	auto commandBytes = input.split(':');
+	auto counter = 0;
+	for (auto& cb: commandBytes) {
+		if (cb.isEmpty()) continue;
+
+		auto fields = cb.split(';');
+		assert(fields.count() == 4);
+
+		QString name = QByteArray::fromBase64(fields[0]);
+		CommandRef command{
+			name,
+			QByteArray::fromBase64(fields[1]),
+			QByteArray::fromBase64(fields[2]),
+			QByteArray::fromBase64(fields[3]),
+			counter++
+		};
+		commands.insert(name, command);
 	}
 }
 
