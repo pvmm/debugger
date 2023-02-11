@@ -499,7 +499,7 @@ void DebuggerForm::createToolbars()
 void DebuggerForm::updateCustomActions()
 {
 	userToolbar->clear();
-	for (auto command: commands) {
+	for (const auto& command: commands) {
 		auto* action = new QAction(command.name, this);
 		action->setStatusTip(command.description);
 		action->setIcon(QIcon(command.icon.isEmpty() ? ":/icons/gear.png" : command.icon));
@@ -1595,10 +1595,10 @@ QByteArray DebuggerForm::saveCommands() const
 {
 	QByteArray output;
 
-	auto counter = 0;
-	for (auto &command : commands) {
-		auto [name, description, source, icon, _] = command;
-		if (counter > 0) output.append(':');
+	auto first = true;
+	for (const auto& [name, description, source, icon, _] : commands) {
+		if (!first) output.append(':');
+		first = false;
 		output.append(name.toUtf8().toBase64());
 		output.append(';');
 		output.append(description.toUtf8().toBase64());
@@ -1606,7 +1606,6 @@ QByteArray DebuggerForm::saveCommands() const
 		output.append(source.toUtf8().toBase64());
 		output.append(';');
 		output.append(icon.toUtf8().toBase64());
-		counter++;
 	}
 
 	return output;
@@ -1618,11 +1617,11 @@ void DebuggerForm::restoreCommands(const QByteArray &input)
 
 	auto commandBytes = input.split(':');
 	auto counter = 0;
-	for (auto& cb: commandBytes) {
+	for (const auto& cb: commandBytes) {
 		if (cb.isEmpty()) continue;
 
 		auto fields = cb.split(';');
-		assert(fields.count() == 4);
+		if (fields.count() < 4) continue;
 
 		QString name = QByteArray::fromBase64(fields[0]);
 		CommandRef command{
@@ -1632,7 +1631,7 @@ void DebuggerForm::restoreCommands(const QByteArray &input)
 			QByteArray::fromBase64(fields[3]),
 			counter++
 		};
-		commands.insert(name, command);
+		commands.append(command);
 	}
 }
 

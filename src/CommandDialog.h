@@ -23,7 +23,7 @@ class CommandDialog : public QDialog, private Ui::CommandDialog
 {
     Q_OBJECT
 public:
-    CommandDialog(QMap<QString, CommandRef>& commands, QWidget* parent = nullptr);
+    CommandDialog(QList<CommandRef>& commands, QWidget* parent = nullptr);
 
     QString icon() const;
     QString name() const;
@@ -37,17 +37,17 @@ private:
 
     int createItem();
     void createCommand();
-    void writeCommand(CommandRef& command);
+    void writeCommand(const CommandRef& command);
 
-    void onSelectedCommandChanged(int currentRow, int currentCol, int previousRow, int previousCol);
+    // void onSelectedCommandChanged(int currentRow, int currentCol, int previousRow, int previousCol);
     void onAddButtonClicked();
     void onRemoveButtonClicked();
-    void changeTableItem(QTableWidgetItem* item);
-    void done();
-    void cancel();
+    void changeTableItem(const QTableWidgetItem* item);
+    void accept() override;
+    void reject() override;
 
     bool userMode = true;
-    QMap<QString, CommandRef>& commands;
+    QList<CommandRef>& commands;
 };
 
 #endif // CONTROLDIALOG_OPENMSX_H

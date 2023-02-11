@@ -5,22 +5,17 @@
 
 
 enum CommandColumns {
-    ICON = 0, NAME, DESCRIPTION, SOURCE, HIDDEN, INDEX, MAX
+    ICON = 0, NAME, DESCRIPTION, SOURCE, MAX
 };
 
 
-CommandDialog::CommandDialog(QMap<QString, CommandRef>& commands, QWidget* parent)
+CommandDialog::CommandDialog(QList<CommandRef>& commands, QWidget* parent)
     : QDialog(parent), commands(commands)
 {
     setupUi(this);
 
-    twCommands->resizeColumnsToContents();
-    twCommands->setColumnHidden(HIDDEN, true);
-    twCommands->verticalHeader()->hide();
-
     connect(btnAdd, &QPushButton::clicked, this, &CommandDialog::onAddButtonClicked);
     connect(btnRemove, &QPushButton::clicked, this, &CommandDialog::onRemoveButtonClicked);
-    connect(twCommands, &QTableWidget::itemChanged, this, &CommandDialog::changeTableItem);
 
     connect(okButton, &QPushButton::clicked, this, &CommandDialog::accept);
     connect(cancelButton, &QPushButton::clicked, this, &CommandDialog::reject);
@@ -30,33 +25,26 @@ CommandDialog::CommandDialog(QMap<QString, CommandRef>& commands, QWidget* paren
 
 void CommandDialog::refresh()
 {
-    QList<QPair<CommandRef, QString>> list;
-
-    // set a comparison list
-    for (auto key: commands.keys()) {
-        list.append(QPair<CommandRef, QString>(commands[key], key));
-    }
-
-    // sort by index
-    std::sort(std::begin(list), std::end(list));
-    auto sa = ScopedAssign(userMode, false);
-
-    // populate
-    for (auto& pair: list) {
+    for (const auto& command : commands) {
         createItem();
-        writeCommand(pair.first);
+        writeCommand(command);
     }
+    twCommands->resizeColumnsToContents();
 }
 
 void CommandDialog::onAddButtonClicked()
 {
     auto sa = ScopedAssign(userMode, false);
     createCommand();
+    twCommands->resizeColumnsToContents();
 }
 
 void CommandDialog::onRemoveButtonClicked()
 {
+    if (twCommands->currentRow() == -1) return;
+
     auto sa = ScopedAssign(userMode, false);
+    twCommands->removeRow(twCommands->currentRow());
 }
 
 int CommandDialog::createItem()
@@ -65,44 +53,33 @@ int CommandDialog::createItem()
     twCommands->setRowCount(row + 1);
     twCommands->selectRow(row);
 
-    auto* item0 = new QTableWidgetItem();
-    item0->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable);
-    twCommands->setItem(row, ICON, item0);
-
-    auto* item1 = new QTableWidgetItem();
-    item1->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable);
-    twCommands->setItem(row, NAME, item1);
-
-    auto* item2 = new QTableWidgetItem();
-    item2->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable);
-    twCommands->setItem(row, DESCRIPTION, item2);
-
-    auto* item3 = new QTableWidgetItem();
-    item3->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable);
-    twCommands->setItem(row, SOURCE, item3);
-
-    auto* item4 = new QTableWidgetItem();
-    twCommands->setItem(row, HIDDEN, item4);
+    for (auto column : {ICON, NAME, DESCRIPTION, SOURCE}) {
+        auto* item = new QTableWidgetItem();
+        item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable);
+        twCommands->setItem(row, column, item);
+    }
 
     return row;
 }
 
 void CommandDialog::createCommand()
 {
-    // get next available name
-    QString ctrlName = {};
-    for (ctrlName = QString(tr("Command_%1")).arg(counter++);
-         commands.find(ctrlName) != commands.end();
-         ctrlName = QString(tr("Command_%1")).arg(counter++))
-    {}
+    // get next available command name
+    QString cmdName = {};
+    bool found = false;
+    do {
+        cmdName = QString(tr("Command_%1")).arg(counter++);
+        found = false;
+        for (auto& command: commands) {
+            if (command.name == cmdName) found = true;
+        }
+    } while (found);
 
     int index = createItem();
-    CommandRef command{ctrlName, {}, {}, ":/icons/gear.png", index};
-    commands.insert(ctrlName, command);
-    writeCommand(command);
+    writeCommand({cmdName, {}, {}, ":/icons/gear.png", index});
 }
 
-void CommandDialog::writeCommand(CommandRef& command)
+void CommandDialog::writeCommand(const CommandRef& command)
 {
     auto* item0 = twCommands->item(command.index, ICON);
     item0->setText(command.icon);
@@ -115,47 +92,23 @@ void CommandDialog::writeCommand(CommandRef& command)
 
     auto* item3 = twCommands->item(command.index, SOURCE);
     item3->setText(command.source);
-
-    auto* item4 = twCommands->item(command.index, HIDDEN);
-    item4->setText(command.name);
-
-    twCommands->resizeColumnsToContents();
 }
 
-void CommandDialog::changeTableItem(QTableWidgetItem* item)
+void CommandDialog::accept()
 {
-    if (!userMode) return;
-
-    int index = twCommands->row(item);
-    auto name = twCommands->item(index, NAME)->text();
-
-    // Has the name of the command changed?
-    switch (twCommands->column(item)) {
-        case ICON:
-            commands[name].icon = item->text();
-            break;
-        case NAME: {
-            QString oldName = twCommands->item(index, HIDDEN)->text();
-            auto oldCommand = commands.take(oldName);
-            oldCommand.name = item->text();
-            oldCommand.index = index;
-            commands.insert(item->text(), oldCommand);
-            break;
-        }
-	case DESCRIPTION:
-            commands[name].description = item->text();
-            break;
-
-        case SOURCE:
-            commands[name].source = item->text();
-            break;
+    commands.clear();
+    for (int row = 0; row < twCommands->rowCount(); ++row) {
+        auto icon = twCommands->item(row, ICON)->text();
+        auto name = twCommands->item(row, NAME)->text();
+        auto description = twCommands->item(row, DESCRIPTION)->text();
+        auto source = twCommands->item(row, SOURCE)->text();
+        const CommandRef command{name, description, source, icon, row};
+        commands.append(command);
     }
+    done(QDialog::Accepted);
 }
 
-void CommandDialog::done()
+void CommandDialog::reject()
 {
-}
-
-void CommandDialog::cancel()
-{
+    done(QDialog::Rejected);
 }

@@ -159,7 +159,7 @@ private:
 	enum {RESET = 0, SLOTS_CHECKED, PC_CHANGED, SLOTS_CHANGED} disasmStatus = RESET;
 	uint16_t disasmAddress;
 
-	QMap<QString, CommandRef> commands;
+	QList<CommandRef> commands;
 	void updateCustomActions();
 
 	void fileNewSession();
@@ -220,7 +220,7 @@ private:
 	void processMerge(const QString& message);
 
 	QByteArray saveCommands() const;
-	void restoreCommands(const QByteArray &input);
+	void restoreCommands(const QByteArray& input);
 
 	friend class QueryPauseHandler;
 	friend class QueryBreakedHandler;
