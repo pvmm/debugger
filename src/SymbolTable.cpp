@@ -147,7 +147,7 @@ Symbol* SymbolTable::getAddressSymbol(int addr, MemoryLayout* ml)
 	return nullptr;
 }
 
-Symbol* SymbolTable::getAddressSymbol(const QString& label, bool case_sensitive)
+[[nodiscard]] Symbol* SymbolTable::getAddressSymbol(const QString& label, bool case_sensitive)
 {
 	for (auto it = addressSymbols.begin(); it != addressSymbols.end(); ++it) {
 		if (it.value()->text().compare(label, Qt::CaseSensitive)==0)
@@ -156,6 +156,19 @@ Symbol* SymbolTable::getAddressSymbol(const QString& label, bool case_sensitive)
 			return it.value();
 	}
 	return nullptr;
+}
+
+[[nodiscard]] QList<Symbol*> SymbolTable::findAddressSymbolsByAddress(int addr, MemoryLayout* ml)
+{
+	QList<Symbol*> symbols;
+	for (auto it = addressSymbols.begin(); it != addressSymbols.end(); ++it) {
+		if (it.value()->type() == Symbol::JUMPLABEL && it.value()->value() == addr) {
+			if (ml == nullptr || it.value()->isSlotValid(ml)) {
+				symbols << *it;
+			}
+		}
+	}
+	return symbols;
 }
 
 QStringList SymbolTable::labelList(bool include_vars, const MemoryLayout* ml) const

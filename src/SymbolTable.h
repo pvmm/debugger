@@ -111,6 +111,7 @@ public:
 	[[nodiscard]] Symbol* getValueSymbol(int val, Symbol::Register reg, MemoryLayout* ml = nullptr);
 	[[nodiscard]] Symbol* getAddressSymbol(int val, MemoryLayout* ml = nullptr);
 	[[nodiscard]] Symbol* getAddressSymbol(const QString& label, bool case_sensitive = false);
+	[[nodiscard]] QList<Symbol*> findAddressSymbolsByAddress(int addr, MemoryLayout* ml = nullptr);
 
 	[[nodiscard]] QStringList labelList(bool include_vars = false, const MemoryLayout* ml = nullptr) const;
 
