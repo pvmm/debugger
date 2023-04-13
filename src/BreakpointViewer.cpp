@@ -151,6 +151,7 @@ void BreakpointViewer::_createBreakpoint(BreakpointRef::Type type, int row)
 
 	auto* command = new Command(cmdStr,
 		[this, type, row] (const QString& id) {
+			return;
 			setTextField(type, row, ID, id);
 
 			auto tableIndex = getTableIndexByRow(type, row);
