@@ -28,6 +28,9 @@ enum TableColumns {
 	TABLE_INDEX = 7,
 };
 
+// How many sync requests to ignore
+static int ignoreSyncRequests = 0;
+
 BreakpointViewer::BreakpointViewer(DebugSession& session, QWidget* parent)
 	:  QTabWidget(parent),
 	  ui(new Ui::BreakpointViewer),
@@ -175,6 +178,7 @@ void BreakpointViewer::_createBreakpoint(BreakpointRef::Type type, int row)
 // TODO: move the createRemoveCommand to a session manager
 void BreakpointViewer::replaceBreakpoint(BreakpointRef::Type type, int row)
 {
+	ignoreSyncRequests = 1;
 	auto* table = tables[type];
 	auto* item  = table->item(row, ID);
 	QString id  = item->text();
@@ -544,9 +548,10 @@ void BreakpointViewer::stretchTable(BreakpointRef::Type type)
 
 BreakpointRef* BreakpointViewer::findBreakpointRefById(BreakpointRef::Type type, const QString& id)
 {
-	if (auto it = maps[type].find(id); it != maps[type].end()) {
-		return &it->second;
-	}
+	auto it = std::find_if(maps[type].begin(), maps[type].end(),
+		[&id](std::pair<const QString, BreakpointRef>& tmp) -> bool { return id == tmp.second.id; }
+	); 
+	if (it != maps[type].end()) return &it->second;
 	return nullptr;
 }
 
@@ -570,6 +575,9 @@ std::optional<int> BreakpointViewer::findTableRowByIndex(BreakpointRef::Type typ
 
 void BreakpointViewer::sync()
 {
+	// don't reload if self-inflicted update
+	if (ignoreSyncRequests-- > 0) return;
+
 	// don't reload if self-inflicted update
 	if (selfUpdating) return;
 
