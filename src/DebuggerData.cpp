@@ -308,6 +308,17 @@ bool Breakpoints::isWatchpoint(quint16 addr, QString* id, bool checkSlot)
 	return false;
 }
 
+std::optional<int>
+Breakpoints::findPosition(const QString& id)
+{
+    auto it = [&](const QString& id) {
+        return std::find_if(begin(breakpoints), end(breakpoints),
+				[&](const Breakpoint& bp) { return bp.id == id; });
+    }(id);
+	if (it == end(breakpoints)) return {};
+	return std::distance(breakpoints.begin(), it);
+}
+
 std::optional<uint16_t>
 Breakpoints::findBreakpoint(uint16_t addr)
 {

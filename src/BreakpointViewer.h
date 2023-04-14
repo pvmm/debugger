@@ -16,9 +16,13 @@ struct BreakpointRef {
 	enum Type { BREAKPOINT, WATCHPOINT, CONDITION, ALL } type;
 
 	QString id;
-
 	int tableIndex = -1;
 	int breakpointIndex = -1;
+	QString symbolName;
+
+	bool operator==(const QString &id_) const {
+		return id_ == id;
+	}
 };
 
 class BreakpointViewer : public QTabWidget, private Ui::BreakpointViewer
@@ -48,6 +52,8 @@ private:
 
 	std::optional<AddressRange> parseSymbolOrValue(const QString& field) const;
 
+	QString findSymbolOrValue(uint16_t address) const;
+
 	std::optional<AddressRange> parseLocationField(std::optional<int> bpIndex,
 	                                               BreakpointRef::Type type,
 	                                               const QString& field,
@@ -58,7 +64,9 @@ private:
 	void createComboBox(int row);
 	Breakpoint::Type readComboBox(int row);
 	int  createTableRow(BreakpointRef::Type type, int row = -1);
-	void fillTableRow(int bpIndex, BreakpointRef::Type type, int row);
+	void fillTableRowId(BreakpointRef::Type type, int row, const QString& id);
+	void fillTableRowLocation(BreakpointRef::Type type, int row, const QString& location);
+	void fillTableRow(BreakpointRef::Type type, int row, int bpIndex);
 	std::optional<Breakpoint> parseTableRow(BreakpointRef::Type type, int row);
 	bool addBreakpointRef(const QString& id, BreakpointRef& data);
 
@@ -101,6 +109,8 @@ private:
 	bool runState;
 	bool conditionsMsg = false;
 	Breakpoints* breakpoints;
+
+	void printBreakpointRef(const QString& prefix);
 };
 
 #endif // BREAKPOINTVIEWER_H

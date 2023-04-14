@@ -154,6 +154,7 @@ private:
 
 	bool mergeBreakpoints;
 	QMap<QString, int> debuggables;
+	bool debugUpdates = false;
 
 	static int counter;
 	enum {RESET = 0, SLOTS_CHECKED, PC_CHANGED, SLOTS_CHANGED} disasmStatus = RESET;

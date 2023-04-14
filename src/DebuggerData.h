@@ -80,6 +80,8 @@ public:
 	void saveBreakpoints(QXmlStreamWriter& xml);
 	void loadBreakpoints(QXmlStreamReader& xml);
 
+	std::optional<int> findPosition(const QString& id);
+
 	std::optional<uint16_t> findBreakpoint(uint16_t addr);
 
 	static QString createSetCommand(Breakpoint::Type type, std::optional<AddressRange> range = {},

@@ -35,6 +35,9 @@ private:
 	SymbolTable symTable;
 	QString fileName;
 	bool modified;
+
+signals:
+	void breakpointsUpdatedLocally();
 };
 
 #endif // DEBUGSESSION_H

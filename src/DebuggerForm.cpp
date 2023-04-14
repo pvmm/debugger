@@ -816,7 +816,15 @@ void DebuggerForm::initConnection()
 
 	comm.sendCommand(new SimpleCommand("openmsx_update enable status"));
 
-	comm.sendCommand(new SimpleCommand("openmsx_update enable debug"));
+	comm.sendCommand(new SimpleCommand("openmsx_update disable debug"));
+
+	comm.sendCommand(new Command("error",
+		[this] (const QString& /*id*/) {},
+		[this] (const QString& /*error*/) {
+			connect(&session, &DebugSession::breakpointsUpdatedLocally, [this](){ reloadBreakpoints(false); });
+		 }
+	));
+
 
 	comm.sendCommand(new ListDebuggablesHandler(*this));
 
@@ -1029,6 +1037,7 @@ void DebuggerForm::openSession(const QString& file)
 	if (systemDisconnectAction->isEnabled()) {
 		// active connection, merge loaded breakpoints
 		reloadBreakpoints(true);
+		// emit breakpointsLoadedOnConnect
 	}
 	// update recent
 	if (session.existsAsFile()) {
@@ -1578,6 +1587,7 @@ void DebuggerForm::reloadBreakpoints(bool merge)
 
 void DebuggerForm::processBreakpoints(const QString& message)
 {
+	qDebug() << "processBreakpoints";
 	session.breakpoints().setBreakpoints(message);
 	disasmView->update();
 	session.sessionModified();
@@ -1587,6 +1597,7 @@ void DebuggerForm::processBreakpoints(const QString& message)
 
 void DebuggerForm::processMerge(const QString& message)
 {
+	qDebug() << "processMerge";
 	QString bps = session.breakpoints().mergeBreakpoints(message);
 	if (!bps.isEmpty()) {
 		comm.sendCommand(new SimpleCommand(bps));
